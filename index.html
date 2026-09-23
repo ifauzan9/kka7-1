@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mouse & Keyboard Quest - KKA Kelas 7</title>
+<style>
+  :root{
+    --bg:#f5f7ff;
+    --card:#ffffff;
+    --ink:#17213b;
+    --muted:#65708a;
+    --blue:#4f7cff;
+    --blue2:#7d9cff;
+    --green:#27b07d;
+    --yellow:#ffca4b;
+    --red:#f0646c;
+    --purple:#8b6cff;
+    --line:#dfe5f4;
+    --shadow:0 16px 45px rgba(53,73,122,.13);
+    --radius:24px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(79,124,255,.12), transparent 28%),
+      radial-gradient(circle at 90% 10%, rgba(139,108,255,.10), transparent 25%),
+      var(--bg);
+    min-height:100vh;
+  }
+  button,input,textarea{font:inherit}
+  button{cursor:pointer}
+  .hidden{display:none!important}
+
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(245,247,255,.88);
+    backdrop-filter: blur(12px);
+    border-bottom:1px solid rgba(223,229,244,.9);
+  }
+  .topbar-inner{
+    max-width:1180px; margin:auto; padding:12px 20px;
+    display:flex; align-items:center; gap:18px; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:11px; min-width:230px}
+  .brand-icon{
+    width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-size:22px;
+    box-shadow:0 8px 24px rgba(79,124,255,.25)
+  }
+  .brand b{display:block;font-size:15px}
+  .brand small{color:var(--muted)}
+  .progress-wrap{flex:1;max-width:560px}
+  .progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .progress{height:10px;background:#e5eaf7;border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--purple));transition:.35s}
+  .xp-pill{background:#fff;border:1px solid var(--line);padding:9px 12px;border-radius:14px;font-weight:800;white-space:nowrap}
+
+  .app{max-width:1180px;margin:0 auto;padding:26px 20px 52px}
+  .hero{
+    display:grid;grid-template-columns:1.4fr .8fr;gap:20px;align-items:stretch;
+    margin-bottom:22px;
+  }
+  .hero-card,.status-card,.mission-card,.exercise-card,.modal-card{
+    background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius)
+  }
+  .hero-card{padding:28px;position:relative;overflow:hidden}
+  .hero-card:after{
+    content:"";position:absolute;right:-70px;top:-80px;width:220px;height:220px;border-radius:50%;
+    background:linear-gradient(135deg,rgba(79,124,255,.2),rgba(139,108,255,.08));
+  }
+  .eyebrow{display:inline-flex;gap:7px;align-items:center;background:#eef2ff;color:#4767cf;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800}
+  h1{font-size:clamp(28px,4vw,48px);line-height:1.02;margin:14px 0 12px;letter-spacing:-1.2px}
+  .hero p{color:var(--muted);font-size:16px;line-height:1.6;max-width:760px}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .btn{
+    border:0;border-radius:14px;padding:12px 16px;font-weight:800;transition:.15s;display:inline-flex;align-items:center;gap:8px;justify-content:center
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 10px 24px rgba(79,124,255,.25)}
+  .btn-soft{background:#eef2ff;color:#3d59bd}
+  .btn-danger{background:#fff0f1;color:#b84049}
+  .status-card{padding:22px;display:grid;align-content:center;gap:14px}
+  .stat-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .stat-row:last-child{border-bottom:0}
+  .stat-label{color:var(--muted);font-size:13px}.stat-value{font-size:21px;font-weight:900}
+
+  .section-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:28px 0 14px}
+  .section-title h2{margin:0;font-size:24px}.section-title p{margin:0;color:var(--muted);font-size:13px}
+  .mission-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .mission-card{padding:17px;position:relative;min-height:176px;transition:.2s}
+  .mission-card.active:hover{transform:translateY(-3px);box-shadow:0 20px 50px rgba(53,73,122,.16)}
+  .mission-card.locked{opacity:.62;filter:saturate(.65)}
+  .mission-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .mission-icon{font-size:27px}.lock{font-size:18px}
+  .mission-card h3{font-size:17px;margin:12px 0 6px}.mission-card p{font-size:13px;color:var(--muted);line-height:1.45;margin:0}
+  .mission-mini{margin-top:14px;display:flex;gap:6px}
+  .dot{width:26px;height:7px;border-radius:999px;background:#e7ebf6}.dot.done{background:var(--green)}.dot.current{background:var(--blue)}
+  .mission-open{margin-top:14px;width:100%;padding:9px 11px;border:0;border-radius:12px;font-weight:800;background:#eef2ff;color:#3f5bc4}
+  .locked .mission-open{background:#f1f3f8;color:#9299aa;cursor:not-allowed}
+
+  .exercise-shell{margin-top:26px}
+  .exercise-card{padding:24px;overflow:hidden}
+  .exercise-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:20px}
+  .exercise-title h2{margin:6px 0 6px;font-size:27px}.exercise-title p{margin:0;color:var(--muted);line-height:1.5}
+  .step-badge{white-space:nowrap;background:#eef2ff;color:#435fc8;border-radius:999px;padding:8px 11px;font-weight:800;font-size:12px}
+  .play-area{min-height:330px;border-radius:20px;background:linear-gradient(180deg,#fbfcff,#f5f7ff);border:1px solid var(--line);padding:20px;position:relative}
+  .tip{background:#fff8dd;border:1px solid #f4dfa0;border-radius:14px;padding:11px 13px;color:#6c5722;font-size:13px;margin-bottom:16px}
+  .feedback{margin-top:16px;padding:13px 15px;border-radius:14px;font-weight:750;display:none}
+  .feedback.show{display:block}.feedback.ok{background:#eaf9f3;color:#187b57;border:1px solid #b9ead7}.feedback.bad{background:#fff0f1;color:#b23f48;border:1px solid #f2c4c8}
+  .exercise-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .next-btn{display:none}.next-btn.show{display:inline-flex}
+
+  /* click target */
+  .center-stage{min-height:260px;display:grid;place-items:center;position:relative}
+  .big-target{width:150px;height:70px;border-radius:22px;border:0;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;font-size:22px;font-weight:900;box-shadow:0 16px 35px rgba(79,124,255,.28)}
+  .target-zone{position:relative;height:300px;border:1px dashed #cbd4ed;border-radius:16px;background:#fff;overflow:hidden}
+  .moving-target{position:absolute;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;border:0;background:linear-gradient(135deg,#ffcc5c,#ff8c69);box-shadow:0 9px 22px rgba(235,130,86,.24);font-size:23px}
+
+  /* dblclick */
+  .icon-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:640px;margin:25px auto}
+  .desktop-icon{border:1px solid var(--line);border-radius:18px;background:white;padding:22px 12px;text-align:center;user-select:none;transition:.15s}
+  .desktop-icon:hover{background:#f7f9ff}.desktop-icon span{display:block;font-size:42px;margin-bottom:8px}.desktop-icon b{font-size:14px}
+
+  /* marquee selection / blok objek */
+  .select-stage{
+    position:relative;min-height:320px;background:#fff;border:1px solid var(--line);border-radius:18px;
+    overflow:hidden;user-select:none;touch-action:none;cursor:crosshair;padding:22px;
+  }
+  .select-grid{
+    display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:24px;max-width:720px;margin:24px auto;
+  }
+  .select-object{
+    min-height:92px;border:1px solid var(--line);border-radius:16px;background:#f9faff;padding:14px 10px;
+    text-align:center;display:grid;place-items:center;align-content:center;gap:5px;transition:.12s;pointer-events:none;
+  }
+  .select-object .obj-icon{font-size:34px;line-height:1}
+  .select-object b{font-size:13px}
+  .select-object.selected{background:#eaf0ff;border-color:#7f9eff;box-shadow:0 0 0 3px rgba(79,124,255,.13) inset}
+  .select-object.target-mark{outline:2px dashed #f0b93f;outline-offset:4px}
+  .selection-box{
+    position:absolute;border:2px solid var(--blue);background:rgba(79,124,255,.13);border-radius:6px;
+    pointer-events:none;display:none;z-index:5;
+  }
+  .select-status{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+  .select-status b{color:var(--ink)}
+
+
+  /* multi-select + move */
+  .multi-stage{position:relative;height:360px;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;user-select:none;touch-action:none}
+  .multi-file{position:absolute;width:92px;height:78px;border:1px solid var(--line);border-radius:14px;background:#f9faff;display:grid;place-items:center;align-content:center;gap:3px;z-index:2}
+  .multi-file span{font-size:29px}.multi-file b{font-size:12px}
+  .multi-file.selected{background:#eaf0ff;border-color:#7f9eff;box-shadow:0 0 0 3px rgba(79,124,255,.13) inset;cursor:grab}
+  .multi-file.moving{cursor:grabbing}
+  .multi-destination{position:absolute;right:22px;bottom:24px;width:190px;height:118px;border:3px dashed #62c69b;border-radius:18px;background:#effaf6;display:grid;place-items:center;text-align:center;color:#187b57;font-weight:900;z-index:1}
+  .multi-select-box{position:absolute;border:2px solid var(--blue);background:rgba(79,124,255,.13);border-radius:6px;pointer-events:none;display:none;z-index:8}
+  .multi-instruction{margin-top:10px;text-align:center;font-size:13px;color:var(--muted)}
+
+  /* resize */
+  .resize-stage{position:relative;height:330px;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;user-select:none;touch-action:none}
+  .resize-target{position:absolute;left:42px;top:46px;border:3px dashed #62c69b;border-radius:16px;background:rgba(98,198,155,.06);pointer-events:none}
+  .resize-window{position:absolute;left:42px;top:46px;border:2px solid #718ee8;border-radius:14px;background:#eef2ff;box-shadow:0 12px 24px rgba(70,91,150,.12);min-width:120px;min-height:80px;max-width:650px;max-height:250px}
+  .resize-titlebar{height:34px;border-bottom:1px solid #cbd6fa;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:900;color:#405cc4;background:#e2e9ff;border-radius:12px 12px 0 0}
+  .resize-body{height:calc(100% - 34px);display:grid;place-items:center;color:#5f6b88;font-weight:800;font-size:13px;padding:8px;text-align:center}
+  .resize-handle{position:absolute;right:-6px;bottom:-6px;width:24px;height:24px;border-radius:8px;background:#4f7cff;border:3px solid #fff;box-shadow:0 3px 9px rgba(79,124,255,.28);cursor:nwse-resize}
+  .resize-size{text-align:center;margin-top:10px;color:var(--muted);font-size:13px}
+
+  /* drag */
+  .drag-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:18px}
+  .items-box,.drop-boxes{background:white;border:1px solid var(--line);border-radius:16px;padding:16px}
+  .drag-items{display:flex;gap:10px;flex-wrap:wrap}
+  .drag-item{padding:12px 14px;background:#eef2ff;border:1px solid #ced8ff;border-radius:14px;font-weight:800;user-select:none;cursor:grab}
+  .drop-list{display:grid;gap:10px}
+  .drop-zone{min-height:58px;border:2px dashed #ccd5eb;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:space-between;background:#fbfcff}
+  .drop-zone.filled{border-style:solid;border-color:#98dec2;background:#effaf6}
+
+  /* scroll */
+  .scroll-box{height:280px;overflow-y:scroll;background:white;border:1px solid var(--line);border-radius:16px;padding:16px;scroll-behavior:smooth;scrollbar-width:auto;scrollbar-color:var(--primary) #e9eef8}
+  .scroll-box::-webkit-scrollbar{width:16px}
+  .scroll-box::-webkit-scrollbar-track{background:#e9eef8;border-radius:12px}
+  .scroll-box::-webkit-scrollbar-thumb{background:var(--primary);border:3px solid #e9eef8;border-radius:12px}
+  .scroll-box::-webkit-scrollbar-thumb:hover{background:var(--primary-dark)}
+  .scroll-spacer{height:430px;display:flex;align-items:center;justify-content:center;color:#a2abc0;font-weight:700}
+  .secret-btn{display:block;margin:14px auto;border:0;background:#eef2ff;color:#405cc4;padding:12px 16px;border-radius:12px;font-weight:900}
+  .secret-btn.found{background:#eaf9f3;color:#187b57}
+
+
+  /* precision */
+  .precision-stage{position:relative;height:320px;border:1px dashed #cbd4ed;border-radius:18px;background:#fff;overflow:hidden}
+  .precision-target,.precision-decoy{position:absolute;border-radius:50%;display:grid;place-items:center;user-select:none;cursor:pointer;font-weight:900;box-shadow:0 8px 18px rgba(66,84,140,.14)}
+  .precision-target{background:linear-gradient(135deg,#ffdb75,#ff9d66);color:#7a3f00;border:2px solid #ffd071}
+  .precision-target.done{background:#eaf9f3;color:#187b57;border-color:#98dec2;transform:scale(.92)}
+  .precision-decoy{background:#eef2ff;color:#4a63c8;border:2px solid #ced8ff}
+
+  /* maze */
+  .maze-wrap{display:grid;gap:12px;justify-items:center}
+  .maze-board{width:100%;max-width:760px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px}
+  .maze-canvas{width:100%;height:290px;display:block;border-radius:12px;background:#fbfcff;cursor:crosshair}
+  .maze-legend{font-size:13px;color:var(--muted);text-align:center}
+
+  /* shift + symbol */
+  .key-combo{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:28px 0 18px}
+  .keycap{min-width:92px;padding:18px 20px;border-radius:16px;background:#fff;border:2px solid #d7def0;box-shadow:0 7px 0 #cbd3e8;font-size:21px;font-weight:900;text-align:center}
+  .combo-plus{font-size:28px;font-weight:900;color:var(--muted)}
+  .symbol-result{width:92px;height:92px;margin:18px auto;border-radius:24px;display:grid;place-items:center;background:#eef2ff;border:2px dashed #a9b9ef;font-size:44px;font-weight:900;color:#435fc8}
+  .symbol-result.success{background:#eaf9f3;border-style:solid;border-color:#98dec2;color:#187b57}
+
+  /* typing */
+  .typing-wrap{max-width:780px;margin:10px auto}
+  .sample-text{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;font-size:23px;font-weight:900;letter-spacing:.2px;text-align:center}
+  .type-input{width:100%;margin-top:14px;border:2px solid #d9e0f1;border-radius:16px;padding:16px;font-size:20px;outline:none;background:#fff}
+  .type-input:focus{border-color:#8ca6ff;box-shadow:0 0 0 4px rgba(79,124,255,.10)}
+  .char-hint{text-align:center;color:var(--muted);font-size:13px;margin-top:9px}
+  textarea.type-input{min-height:120px;resize:vertical}
+
+  .start-overlay,.finish-overlay{
+    position:fixed;inset:0;background:rgba(20,28,48,.55);backdrop-filter:blur(7px);z-index:200;display:grid;place-items:center;padding:18px
+  }
+  .modal-card{max-width:620px;width:100%;padding:30px;text-align:center}
+  .modal-emoji{font-size:64px}.modal-card h2{font-size:34px;margin:10px 0}.modal-card p{color:var(--muted);line-height:1.6}.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.rule{background:#f6f8ff;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:13px}
+
+  .badge-panel{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 20px;margin-bottom:22px}
+  .badge-panel-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+  .badge-panel-head h3{margin:0;font-size:18px}.badge-panel-head small{color:var(--muted)}
+  .badge-shelf{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .badge-card{border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center;background:#fafbff;transition:.2s}
+  .badge-card.locked{opacity:.42;filter:grayscale(.8)}
+  .badge-card.earned{background:#fff9e9;border-color:#f1d987;box-shadow:0 7px 18px rgba(229,183,62,.12)}
+  .badge-icon{font-size:28px;display:block;margin-bottom:5px}.badge-name{font-size:12px;font-weight:900}.badge-desc{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+  .auto-hint{margin-top:9px;padding:10px 12px;border-radius:12px;background:#fff8dd;border:1px solid #f0da8b;color:#6b5620;font-weight:700}
+  .focus-note{display:inline-flex;align-items:center;gap:6px;background:#eefaf6;color:#187b57;border:1px solid #b9ead7;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:800}
+  .finish-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0;text-align:left}
+  .finish-stat{background:#f6f8ff;border:1px solid var(--line);border-radius:14px;padding:13px}
+  .finish-stat small{display:block;color:var(--muted);margin-bottom:4px}.finish-stat b{font-size:20px}
+  .finish-badges{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:12px 0 18px}.finish-badge{background:#fff9e9;border:1px solid #f1d987;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:900}
+  .result-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#17213b;color:#fff;padding:11px;border-radius:12px;margin:10px 0;font-weight:900;letter-spacing:.5px}
+
+  .teacher-access{margin-top:16px;padding:14px;border:1px dashed #b9c5e8;border-radius:16px;background:#f8faff}
+  .teacher-access-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+  .teacher-access-head b{font-size:14px}.teacher-access-head small{color:var(--muted)}
+  .teacher-access-row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+  .teacher-code-input{flex:1;min-width:180px;border:2px solid #d9e0f1;border-radius:12px;padding:11px 13px;outline:none;background:#fff}
+  .teacher-code-input:focus{border-color:#8ca6ff;box-shadow:0 0 0 4px rgba(79,124,255,.10)}
+  .teacher-code-msg{min-height:18px;margin-top:7px;font-size:12px;font-weight:800;color:var(--muted)}
+  .teacher-code-msg.ok{color:#187b57}.teacher-code-msg.bad{color:#b23f48}
+  .teacher-toolbar{margin-top:14px;padding:12px 14px;border:1px solid #b9ead7;border-radius:14px;background:#eefaf6;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .teacher-toolbar b{color:#187b57}.teacher-toolbar small{color:#46685c}
+  .teacher-ex-links{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+  .teacher-ex-btn{border:1px solid #cbd6f5;background:#fff;color:#3f5bc4;border-radius:9px;padding:7px 5px;font-size:11px;font-weight:900;cursor:pointer}
+  .teacher-ex-btn:hover{background:#eef2ff}
+  .teacher-mode-tag{display:inline-flex;align-items:center;gap:5px;background:#eaf9f3;color:#187b57;border:1px solid #b9ead7;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:900}
+  .file-panel{margin-top:14px;padding:16px;border:1px solid #d8e0f3;border-radius:16px;background:#fbfcff}
+  .file-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .file-panel-head b{font-size:14px}.file-panel-head small{display:block;color:var(--muted);margin-top:3px;line-height:1.45}
+  .file-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .file-field label{display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+  .file-name-input{width:100%;border:2px solid #d9e0f1;border-radius:12px;padding:11px 13px;outline:none;background:#fff;font-size:14px}
+  .file-name-input:focus{border-color:#8ca6ff;box-shadow:0 0 0 4px rgba(79,124,255,.10)}
+  .file-name-input[readonly]{background:#f1f4fa;color:#5f687d;cursor:not-allowed;border-style:dashed}
+  .file-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .file-msg{min-height:18px;margin-top:8px;font-size:12px;font-weight:800;color:var(--muted)}
+  .file-msg.ok{color:#187b57}.file-msg.bad{color:#b23f48}
+  .owner-lock{display:inline-flex;align-items:center;gap:5px;background:#eef2ff;color:#405cc4;border:1px solid #ced8ff;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900}
+
+  .toast{position:fixed;right:18px;bottom:18px;z-index:300;background:#18213a;color:#fff;padding:13px 15px;border-radius:14px;box-shadow:var(--shadow);transform:translateY(120px);opacity:0;transition:.25s;font-weight:800}
+  .toast.show{transform:translateY(0);opacity:1}
+
+  @media (max-width:950px){.badge-shelf{grid-template-columns:repeat(3,1fr)}.mission-grid{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr}.status-card{grid-template-columns:repeat(3,1fr)}.stat-row{display:block;text-align:center;border:0}.drag-layout{grid-template-columns:1fr}.topbar-inner{flex-wrap:wrap}.progress-wrap{order:3;flex-basis:100%;max-width:none}}
+  @media (max-width:620px){.file-grid{grid-template-columns:1fr}.badge-shelf{grid-template-columns:1fr 1fr}.finish-grid{grid-template-columns:1fr}.mission-grid{grid-template-columns:1fr}.app{padding:18px 12px 40px}.hero-card,.status-card,.exercise-card{padding:18px}.rules{grid-template-columns:1fr}.icon-grid{grid-template-columns:repeat(2,1fr)}.exercise-head{flex-direction:column}.status-card{grid-template-columns:1fr}.topbar-inner{padding:10px 12px}.brand{min-width:auto}.brand small{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-icon">🎮</div>
+      <div><b>Mouse & Keyboard Quest</b><small>KKA Kelas 7</small></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span>Progress Latihan</span><span id="progressText">0 / 45</span></div>
+      <div class="progress"><div id="progressFill" class="progress-fill"></div></div>
+    </div>
+    <div class="xp-pill">⭐ <span id="xpText">0</span> XP</div>
+  </div>
+</div>
+
+<main class="app">
+  <section class="hero">
+    <div class="hero-card">
+      <span class="eyebrow">🖱️ Praktik Mandiri Lab Komputer</span>
+      <h1>Taklukkan 15 Misi Komputer!</h1>
+      <p>Setiap misi memiliki 3 latihan. Latihan berikutnya akan terbuka setelah latihan sebelumnya berhasil. Baca petunjuk di layar, coba sendiri, dan kumpulkan XP sebanyak-banyaknya.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="continueBtn">▶ Lanjutkan Latihan</button>
+        <button class="btn btn-soft" id="focusBtn">⛶ Mode Fokus</button>
+        <button class="btn btn-soft" id="showMissionsBtn">🗺️ Lihat Peta Misi</button>
+        <button class="btn btn-soft" id="resetBtn">↻ Reset Tantangan</button>
+        <button class="btn btn-danger" id="resetAllBtn">🗑️ Reset Semua Data</button>
+      </div>
+      <div class="teacher-access" id="teacherAccessPanel">
+        <div class="teacher-access-head"><b>👨‍🏫 Akses Guru</b><small>Buka semua latihan tanpa mengubah progres siswa.</small></div>
+        <div class="teacher-access-row">
+          <input id="teacherCodeInput" class="teacher-code-input" type="password" autocomplete="off" placeholder="Masukkan kode guru" aria-label="Kode guru">
+          <button id="teacherUnlockBtn" class="btn btn-soft" type="button">🔓 Buka Semua</button>
+        </div>
+        <div id="teacherCodeMsg" class="teacher-code-msg"></div>
+      </div>
+      <div id="teacherToolbar" class="teacher-toolbar hidden">
+        <div><b>✅ Mode Guru aktif</b><br><small>Semua 45 latihan terbuka. Pilih Latihan 1/2/3 pada kartu misi.</small></div>
+        <button id="teacherExitBtn" class="btn btn-soft" type="button">Keluar Mode Guru</button>
+      </div>
+      <div class="file-panel" id="filePanel">
+        <div class="file-panel-head">
+          <div><b>💾 Simpan / Import File Progres</b><small>Simpan progres ke file agar bisa dilanjutkan di komputer lain.</small></div>
+          <span class="owner-lock">🔒 Pemilik asli terkunci</span>
+        </div>
+        <div class="file-grid">
+          <div class="file-field">
+            <label for="fileNameInput">Nama File Saat Ini — bisa diubah</label>
+            <input id="fileNameInput" class="file-name-input" type="text" maxlength="70" autocomplete="off" placeholder="Contoh: Aulia_7A">
+          </div>
+          <div class="file-field">
+            <label for="originalFileNameInput">Nama File Pertama / Pemilik — tidak bisa diubah</label>
+            <input id="originalFileNameInput" class="file-name-input" type="text" readonly placeholder="Terkunci setelah Save pertama">
+          </div>
+        </div>
+        <div class="file-actions">
+          <button id="saveProgressFileBtn" class="btn btn-primary" type="button">💾 Save File</button>
+          <button id="importProgressFileBtn" class="btn btn-soft" type="button">📂 Import File</button>
+          <input id="importProgressFileInput" type="file" accept=".json,.kka7,.kka7.json,application/json" class="hidden">
+        </div>
+        <div id="fileProgressMsg" class="file-msg">Nama file pertama akan menjadi identitas pemilik dan terkunci setelah Save pertama.</div>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="stat-row"><span class="stat-label">Misi terbuka</span><span class="stat-value" id="openMissionStat">1 / 15</span></div>
+      <div class="stat-row"><span class="stat-label">Latihan selesai</span><span class="stat-value" id="doneStat">0 / 45</span></div>
+      <div class="stat-row"><span class="stat-label">Status</span><span class="stat-value" id="statusStat">Pemula</span></div>
+    </div>
+  </section>
+
+  <section class="badge-panel">
+    <div class="badge-panel-head">
+      <h3>🏅 Koleksi Badge</h3>
+      <small>Badge terbuka otomatis saat kemampuanmu meningkat.</small>
+    </div>
+    <div id="badgeShelf" class="badge-shelf"></div>
+  </section>
+
+  <section id="missionSection">
+    <div class="section-title">
+      <div><h2>Peta Misi</h2><p>Selesaikan berurutan agar misi berikutnya terbuka.</p></div>
+      <p>🔒 = terkunci &nbsp; ✅ = selesai</p>
+    </div>
+    <div id="missionGrid" class="mission-grid"></div>
+  </section>
+
+  <section id="exerciseShell" class="exercise-shell hidden">
+    <div class="exercise-card">
+      <div class="exercise-head">
+        <div class="exercise-title">
+          <span class="eyebrow" id="exerciseMissionLabel">Misi 1</span>
+          <h2 id="exerciseTitle">Judul Latihan</h2>
+          <p id="exerciseDesc">Deskripsi</p>
+        </div>
+        <div class="step-badge" id="exerciseStep">Latihan 1 dari 3</div>
+      </div>
+      <div id="playArea" class="play-area"></div>
+      <div id="feedback" class="feedback"></div>
+      <div class="exercise-actions">
+        <button id="retryBtn" class="btn btn-soft hidden">↻ Ulangi Latihan</button>
+        <button id="nextBtn" class="btn btn-primary next-btn">Lanjut ➜</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="startOverlay" class="start-overlay">
+  <div class="modal-card">
+    <div class="modal-emoji">🕹️</div>
+    <h2>Siap Mulai?</h2>
+    <p>Kamu akan menyelesaikan <b>45 latihan</b>. Tidak perlu menunggu teman. Jika salah, coba lagi sampai berhasil.</p>
+    <div class="rules">
+      <div class="rule">📖<br><b>Baca</b><br>petunjuk tiap latihan</div>
+      <div class="rule">🎯<br><b>Kerjakan</b><br>sampai berhasil</div>
+      <div class="rule">🔓<br><b>Buka</b><br>latihan berikutnya</div>
+    </div>
+    <div class="teacher-access" style="text-align:left;margin-bottom:12px">
+      <div class="teacher-access-head"><b>👨‍🏫 Akses Guru</b><small>Opsional</small></div>
+      <div class="teacher-access-row">
+        <input id="teacherCodeInputStart" class="teacher-code-input" type="password" autocomplete="off" placeholder="Masukkan kode guru" aria-label="Kode guru pada layar awal">
+        <button id="teacherUnlockBtnStart" class="btn btn-soft" type="button">🔓 Buka Semua</button>
+      </div>
+      <div id="teacherCodeMsgStart" class="teacher-code-msg"></div>
+    </div>
+    <button id="startFocusBtn" class="btn btn-primary" style="width:100%;font-size:18px;padding:15px">⛶ Mulai dalam Mode Fokus</button>
+    <button id="startBtn" class="btn btn-soft" style="width:100%;font-size:16px;padding:13px;margin-top:9px">Mulai Biasa</button>
+  </div>
+</div>
+
+<div id="finishOverlay" class="finish-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-emoji">🏆</div>
+    <h2>Misi Selesai!</h2>
+    <p>Kamu berhasil menuntaskan seluruh latihan mouse dan keyboard.</p>
+    <div id="finishStats" class="finish-grid"></div>
+    <div><b>Badge yang didapat</b></div>
+    <div id="finishBadges" class="finish-badges"></div>
+    <div><small style="color:var(--muted)">Kode hasil</small></div>
+    <div id="resultCode" class="result-code">KKA-MK</div>
+    <button id="finishCloseBtn" class="btn btn-primary" style="width:100%">Kembali ke Peta Misi</button>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const missions = [
+  {icon:'🖱️', title:'Klik Kiri', desc:'Klik target dengan tepat.', exercises:[
+    {title:'Klik Tombol Mulai', desc:'Gunakan klik kiri pada tombol besar.', type:'clickStart'},
+    {title:'Klik 5 Target', desc:'Target akan berpindah setelah diklik.', type:'movingTargets', count:5},
+    {title:'Klik 10 Target', desc:'Cari target yang muncul acak di layar.', type:'movingTargets', count:10}
+  ]},
+  {icon:'⚡', title:'Double Click', desc:'Klik dua kali dengan cepat.', exercises:[
+    {title:'Buka Folder', desc:'Double click ikon Folder.', type:'dbl', target:'Folder'},
+    {title:'Buka Dokumen', desc:'Double click ikon Dokumen.', type:'dbl', target:'Dokumen'},
+    {title:'Temukan Gambar', desc:'Double click hanya ikon Gambar.', type:'dblMixed', target:'Gambar'}
+  ]},
+  {icon:'🖱️', title:'Klik Kanan', desc:'Gunakan tombol kanan mouse dengan tepat.', exercises:[
+    {title:'Klik Kanan Folder', desc:'Klik kanan satu kali pada ikon Folder.', type:'rightClick', target:'Folder', mixed:false},
+    {title:'Klik Kanan Dokumen', desc:'Klik kanan satu kali pada ikon Dokumen.', type:'rightClick', target:'Dokumen', mixed:false},
+    {title:'Pilih Ikon yang Benar', desc:'Di antara beberapa ikon, klik kanan hanya pada ikon Gambar.', type:'rightClick', target:'Gambar', mixed:true}
+  ]},
+  {icon:'▧', title:'Blok / Seleksi Objek', desc:'Klik kiri, tahan, lalu geser untuk membuat kotak seleksi.', exercises:[
+    {title:'Blok 1 Objek', desc:'Klik area kosong, tahan klik kiri, lalu geser hingga ikon Folder masuk kotak seleksi.', type:'marqueeSelect', targets:['Folder'], layout:'single'},
+    {title:'Blok 2 Objek', desc:'Blok dua ikon sekaligus: Folder dan Dokumen.', type:'marqueeSelect', targets:['Folder','Dokumen'], layout:'pair'},
+    {title:'Blok 3 Objek', desc:'Blok tiga ikon sekaligus: Gambar, Musik, dan Video.', type:'marqueeSelect', targets:['Gambar','Musik','Video'], layout:'triple'}
+  ]},
+  {icon:'📦', title:'Pindahkan Objek Terpilih', desc:'Seleksi beberapa objek lalu pindahkan semuanya sekaligus.', exercises:[
+    {title:'Pindahkan 2 Objek', desc:'Seleksi Foto dan Dokumen, lalu seret keduanya ke Folder Tugas.', type:'multiMove', targets:['Foto','Dokumen'], level:1},
+    {title:'Pindahkan 3 Objek', desc:'Seleksi Foto, Dokumen, dan Musik, lalu pindahkan bersama-sama.', type:'multiMove', targets:['Foto','Dokumen','Musik'], level:2},
+    {title:'Pindahkan 4 Objek', desc:'Seleksi empat file yang diminta lalu pindahkan sekaligus ke Folder Tugas.', type:'multiMove', targets:['Foto','Dokumen','Musik','Video'], level:3}
+  ]},
+  {icon:'🧲', title:'Drag & Drop', desc:'Seret benda ke tempatnya.', exercises:[
+    {title:'Pensil ke Kotak', desc:'Seret pensil ke kotak pensil.', type:'drag', pairs:[['✏️ Pensil','Kotak Pensil']]},
+    {title:'3 Benda', desc:'Pasangkan setiap benda dengan tempat yang benar.', type:'drag', pairs:[['📚 Buku','Rak Buku'],['⚽ Bola','Kotak Olahraga'],['🗑️ Sampah','Tempat Sampah']]},
+    {title:'5 Benda', desc:'Pasangkan semua benda dengan benar.', type:'drag', pairs:[['✏️ Pensil','Kotak Pensil'],['📚 Buku','Rak Buku'],['⚽ Bola','Kotak Olahraga'],['🗑️ Sampah','Tempat Sampah'],['🥤 Botol','Tas Bekal']]}
+  ]},
+  {icon:'↘️', title:'Ubah Ukuran Objek', desc:'Seret handle di sudut untuk mengubah ukuran objek atau jendela.', exercises:[
+    {title:'Perbesar Kotak', desc:'Tarik sudut kanan bawah sampai kotak sama dengan target.', type:'resizeObject', start:[180,100], target:[320,170]},
+    {title:'Lebarkan Jendela', desc:'Ubah ukuran jendela sampai cocok dengan target.', type:'resizeObject', start:[220,110], target:[430,150]},
+    {title:'Perbesar Jendela', desc:'Atur lebar dan tinggi sampai jendela pas dengan target.', type:'resizeObject', start:[180,130], target:[380,230]}
+  ]},
+  {icon:'🛞', title:'Scroll & Scrollbar', desc:'Gulir dengan wheel mouse atau scrollbar untuk mencari target.', exercises:[
+    {title:'Temukan Aku', desc:'Gunakan wheel mouse atau seret scrollbar ke bawah, lalu klik tulisan rahasia.', type:'scrollOne'},
+    {title:'Latihan Scrollbar', desc:'Klik-tahan scrollbar di sisi kanan, geser ke bawah lalu kembali ke atas.', type:'scrollRound'},
+    {title:'3 Kata Rahasia', desc:'Cari KOMPUTER, KKA, dan TEKNOLOGI dengan wheel atau scrollbar.', type:'scrollSecrets'}
+  ]},
+  {icon:'🎯', title:'Mouse Precision', desc:'Latih ketelitian mengarahkan pointer ke target kecil.', exercises:[
+    {title:'Target Sedang', desc:'Klik semua bintang kuning berukuran sedang.', type:'precision', targetCount:5, decoyCount:2, size:42},
+    {title:'Target Kecil', desc:'Klik semua bintang kuning kecil. Hindari lingkaran biru.', type:'precision', targetCount:6, decoyCount:4, size:32},
+    {title:'Target Mini', desc:'Klik semua target mini dengan teliti.', type:'precision', targetCount:8, decoyCount:5, size:24}
+  ]},
+  {icon:'🛣️', title:'Ikuti Jalur', desc:'Klik dan tahan, lalu gerakkan mouse mengikuti jalur sampai FINISH.', exercises:[
+    {title:'Jalur Mudah', desc:'Mulai dari START, tahan klik kiri, lalu ikuti jalur sampai FINISH.', type:'maze', level:1},
+    {title:'Jalur Menengah', desc:'Jalurnya lebih panjang. Tetap tahan klik kiri sampai selesai.', type:'maze', level:2},
+    {title:'Jalur Sulit', desc:'Jalur lebih sempit dan berbelok. Gerakkan mouse perlahan dan teliti.', type:'maze', level:3}
+  ]},
+  {icon:'⌨️', title:'Mengetik', desc:'Ketik persis seperti contoh.', exercises:[
+    {title:'Kata Pendek', desc:'Ketik satu kata dengan tepat.', type:'typing', text:'komputer'},
+    {title:'Dua Kata', desc:'Perhatikan spasi antar kata.', type:'typing', text:'belajar teknologi'},
+    {title:'Kalimat Pendek', desc:'Ketik seluruh kalimat tanpa salah.', type:'typing', text:'saya belajar komputer di sekolah'}
+  ]},
+  {icon:'⬆️', title:'Shift & Huruf Besar', desc:'Latihan huruf kapital.', exercises:[
+    {title:'Huruf Besar', desc:'Gunakan huruf kapital sesuai contoh.', type:'typing', text:'KKA'},
+    {title:'Dua Kata', desc:'Perhatikan huruf K dan T.', type:'typing', text:'Kelas Tujuh'},
+    {title:'Judul Singkat', desc:'Ketik persis seperti contoh.', type:'typing', text:'Saya Belajar Teknologi'}
+  ]},
+  {icon:'✨', title:'Shift + Simbol', desc:'Gunakan Shift untuk membuat simbol.', exercises:[
+    {title:'Simbol Seru !', desc:'Tekan Shift + 1 untuk membuat tanda seru.', type:'shiftSymbol', symbol:'!', keyLabel:'1'},
+    {title:'Simbol @', desc:'Tekan Shift + 2 untuk membuat simbol @.', type:'shiftSymbol', symbol:'@', keyLabel:'2'},
+    {title:'Simbol &', desc:'Tekan Shift + 7 untuk membuat simbol &.', type:'shiftSymbol', symbol:'&', keyLabel:'7'}
+  ]},
+  {icon:'↩️', title:'Backspace & Enter', desc:'Perbaiki salah ketik dan buat baris baru.', exercises:[
+    {title:'Perbaiki Kata', desc:'Hapus huruf berlebih dengan Backspace.', type:'editTyping', initial:'komputerr', answer:'komputer'},
+    {title:'Perbaiki Kalimat', desc:'Perbaiki dua kata yang salah.', type:'editTyping', initial:'Saya belajarr teknologii', answer:'Saya belajar teknologi'},
+    {title:'Tiga Baris', desc:'Gunakan Enter agar teks menjadi 3 baris.', type:'multiline', text:'KKA\nKelas 7\nLab Komputer'}
+  ]},
+  {icon:'🏆', title:'Tantangan Keyboard', desc:'Gabungkan kemampuan mengetik.', exercises:[
+    {title:'KKA Kelas 7', desc:'Perhatikan huruf besar dan spasi.', type:'typing', text:'KKA Kelas 7'},
+    {title:'Simbol &', desc:'Ketik simbol & dengan tepat.', type:'typing', text:'Mouse & Keyboard'},
+    {title:'Tantangan Akhir', desc:'Ketik seluruh kalimat dengan teliti.', type:'typing', text:'Hari ini saya belajar menggunakan Mouse & Keyboard dengan baik!'}
+  ]}
+];
+
+const TOTAL = missions.length * 3;
+const TEACHER_CODE = 'spensahade';
+let teacherMode = false;
+const STORAGE_KEY='mkQuestStateV9';
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {completed:0, started:false};
+state.completed = Number(state.completed || 0);
+state.started = !!state.started;
+state.totalMistakes = Number(state.totalMistakes || 0);
+state.attempts = state.attempts || {};
+state.fileName = typeof state.fileName==='string' ? state.fileName : '';
+state.originalFileName = typeof state.originalFileName==='string' ? state.originalFileName : '';
+let activeIndex = Math.min(state.completed, TOTAL-1);
+let currentCleanup = null;
+let sessionStart = Date.now();
+
+const BADGES = [
+  {at:3, icon:'🎯', name:'Klik Jitu', desc:'Misi Klik Kiri selesai'},
+  {at:12, icon:'▧', name:'Seleksi Master', desc:'Misi Blok / Seleksi selesai'},
+  {at:15, icon:'📦', name:'Multi Move', desc:'Misi Pindahkan Objek Terpilih selesai'},
+  {at:21, icon:'↘️', name:'Resize Pro', desc:'Misi Ubah Ukuran Objek selesai'},
+  {at:27, icon:'🎯', name:'Precision Hunter', desc:'Misi Mouse Precision selesai'},
+  {at:30, icon:'🖱️', name:'Mouse Master', desc:'Semua misi mouse selesai'},
+  {at:33, icon:'⌨️', name:'Keyboard Rookie', desc:'Misi mengetik selesai'},
+  {at:39, icon:'✨', name:'Shift Master', desc:'Misi Shift + Simbol selesai'},
+  {at:45, icon:'🏆', name:'Computer Explorer', desc:'Semua misi selesai'}
+];
+
+const $ = s => document.querySelector(s);
+const progressText=$('#progressText'),progressFill=$('#progressFill'),xpText=$('#xpText'),doneStat=$('#doneStat'),openMissionStat=$('#openMissionStat'),statusStat=$('#statusStat');
+const missionGrid=$('#missionGrid'),exerciseShell=$('#exerciseShell'),playArea=$('#playArea'),feedback=$('#feedback'),nextBtn=$('#nextBtn'),retryBtn=$('#retryBtn'),badgeShelf=$('#badgeShelf');
+const fileNameInput=$('#fileNameInput'),originalFileNameInput=$('#originalFileNameInput'),fileProgressMsg=$('#fileProgressMsg'),importProgressFileInput=$('#importProgressFileInput');
+
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function setFileMessage(ok,msg){
+  if(!fileProgressMsg) return;
+  fileProgressMsg.textContent=msg;
+  fileProgressMsg.className='file-msg '+(ok?'ok':'bad');
+}
+function sanitizeFileName(name){
+  return String(name||'').replace(/[\\/:*?\"<>|\x00-\x1F]/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
+}
+function syncFileIdentityUI(){
+  if(fileNameInput && document.activeElement!==fileNameInput) fileNameInput.value=state.fileName||'';
+  if(originalFileNameInput) originalFileNameInput.value=state.originalFileName||'';
+}
+function exportProgressFile(){
+  const cleaned=sanitizeFileName(fileNameInput ? fileNameInput.value : state.fileName);
+  if(!cleaned){
+    setFileMessage(false,'Isi Nama File terlebih dahulu, misalnya: Aulia_7A.');
+    if(fileNameInput) fileNameInput.focus();
+    return;
+  }
+  state.fileName=cleaned;
+  if(!state.originalFileName) state.originalFileName=cleaned;
+  save(); syncFileIdentityUI();
+  const payload={
+    appId:'KKA_MOUSE_KEYBOARD_QUEST',
+    schemaVersion:1,
+    exportedAt:new Date().toISOString(),
+    currentFileName:state.fileName,
+    originalFileName:state.originalFileName,
+    totalExercises:TOTAL,
+    progress:{
+      completed:state.completed,
+      started:state.started,
+      totalMistakes:state.totalMistakes,
+      attempts:state.attempts
+    }
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=cleaned+'.kka7.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  setFileMessage(true,`File tersimpan. Pemilik asli: ${state.originalFileName}`);
+}
+function normalizeImportedAttempts(value){
+  const out={};
+  if(value && typeof value==='object'){
+    Object.keys(value).slice(0,TOTAL).forEach(k=>{
+      const n=Math.max(0,Math.floor(Number(value[k])||0));
+      if(n) out[k]=n;
+    });
+  }
+  return out;
+}
+async function importProgressFile(file){
+  if(!file) return;
+  try{
+    const raw=await file.text();
+    const data=JSON.parse(raw);
+    if(!data || data.appId!=='KKA_MOUSE_KEYBOARD_QUEST' || !data.progress) throw new Error('File bukan progres Mouse & Keyboard Quest.');
+    const importedCurrent=sanitizeFileName(data.currentFileName || file.name.replace(/\.kka7\.json$|\.json$|\.kka7$/i,''));
+    const importedOriginal=sanitizeFileName(data.originalFileName || importedCurrent);
+    if(!importedOriginal) throw new Error('Identitas pemilik file tidak ditemukan.');
+    const p=data.progress||{};
+    state={
+      completed:Math.max(0,Math.min(TOTAL,Math.floor(Number(p.completed)||0))),
+      started:p.started!==false,
+      totalMistakes:Math.max(0,Math.floor(Number(p.totalMistakes)||0)),
+      attempts:normalizeImportedAttempts(p.attempts),
+      fileName:importedCurrent || importedOriginal,
+      originalFileName:importedOriginal
+    };
+    activeIndex=Math.min(state.completed,TOTAL-1);
+    teacherMode=false;
+    sessionStart=Date.now();
+    save(); syncFileIdentityUI(); updateStats(); renderMissions();
+    $('#teacherToolbar').classList.add('hidden');
+    $('#startOverlay').classList.add('hidden');
+    setFileMessage(true,`Import berhasil. Pemilik asli file: ${state.originalFileName}`);
+    toast('📂 Progres berhasil di-import.');
+    if(state.completed>=TOTAL){renderFinish();$('#finishOverlay').classList.remove('hidden');}
+    else openExercise(Math.min(state.completed,TOTAL-1));
+  }catch(err){
+    setFileMessage(false,'Import gagal: '+(err && err.message ? err.message : 'format file tidak valid.'));
+  }finally{
+    if(importProgressFileInput) importProgressFileInput.value='';
+  }
+}
+function idxToME(idx){ return {m:Math.floor(idx/3), e:idx%3}; }
+function missionOpen(m){ return teacherMode || state.completed >= m*3; }
+function missionDone(m){ return state.completed >= (m+1)*3; }
+function currentOpenMission(){ return teacherMode ? missions.length : Math.min(missions.length, Math.floor(state.completed/3)+1); }
+function rank(){ if(state.completed>=TOTAL) return 'Jago Komputer'; if(state.completed>=39) return 'Mahir'; if(state.completed>=30) return 'Terampil'; if(state.completed>=15) return 'Berkembang'; return 'Pemula'; }
+function earnedBadges(){ return BADGES.filter(b=>state.completed>=b.at); }
+function renderBadges(){
+  badgeShelf.innerHTML=BADGES.map(b=>{
+    const earned=state.completed>=b.at;
+    return `<div class="badge-card ${earned?'earned':'locked'}"><span class="badge-icon">${earned?b.icon:'🔒'}</span><span class="badge-name">${b.name}</span><span class="badge-desc">${earned?b.desc:`Terbuka pada ${b.at}/${TOTAL}`}</span></div>`;
+  }).join('');
+}
+function getHint(){
+  const {m,e}=idxToME(activeIndex); const ex=missions[m].exercises[e];
+  const map={
+    clickStart:'Arahkan kursor ke tombol besar, lalu tekan tombol kiri mouse satu kali.',
+    movingTargets:'Gunakan klik kiri. Setelah target berpindah, cari lagi di dalam area latihan.',
+    dbl:'Klik dua kali dengan cepat pada ikon yang diminta.',
+    dblMixed:'Baca nama ikonnya dahulu, lalu double click hanya ikon yang diminta.',
+    rightClick:'Gunakan tombol mouse sebelah kanan, bukan tombol kiri.',
+    marqueeSelect:'Mulai dari area kosong. Tekan dan tahan klik kiri, lalu geser sampai semua objek target berada di dalam kotak biru. Setelah itu lepaskan klik.',
+    multiMove:'Pertama buat kotak seleksi untuk memilih semua objek target. Setelah terpilih, klik-tahan salah satu objek yang disorot lalu seret seluruh kelompok ke Folder Tugas.',
+    drag:'Klik dan tahan bendanya, geser ke tempat yang cocok, lalu lepaskan.',
+    resizeObject:'Arahkan pointer ke handle di sudut kanan bawah. Klik-tahan lalu geser sampai tepi kotak sama dengan garis target.',
+    scrollOne:'Gunakan salah satu cara: putar wheel mouse atau klik-tahan batang scrollbar di sisi kanan lalu geser ke bawah.',
+    scrollRound:'Cari batang scrollbar di sisi kanan kotak. Klik-tahan bagian batangnya, geser ke bawah, lalu kembali ke atas.',
+    scrollSecrets:'Gunakan wheel atau scrollbar. Kata yang sudah ditemukan akan berubah tanda.',
+    precision:'Arahkan pointer pelan-pelan ke target bintang kuning. Hindari lingkaran biru jika ada.',
+    maze:'Mulai dari lingkaran START. Klik dan tahan tombol kiri mouse, lalu ikuti jalur biru sampai FINISH tanpa keluar jalur.',
+    typing:'Bandingkan contoh karakter demi karakter: huruf besar, huruf kecil, dan spasi harus sama.',
+    shiftSymbol:`Tahan Shift lalu tekan tombol ${ex.keyLabel}. Jangan lepaskan Shift terlalu cepat.`,
+    editTyping:'Letakkan kursor di akhir teks dan gunakan Backspace untuk menghapus huruf yang berlebih.',
+    multiline:'Gunakan Enter untuk pindah baris. Hasil harus terdiri dari tiga baris seperti contoh.'
+  };
+  return map[ex.type] || 'Baca kembali petunjuk di bagian atas dan coba perlahan.';
+}
+function updateStats(){
+  progressText.textContent=`${state.completed} / ${TOTAL}`;
+  progressFill.style.width=`${state.completed/TOTAL*100}%`;
+  xpText.textContent=state.completed*100;
+  doneStat.textContent=`${state.completed} / ${TOTAL}`;
+  openMissionStat.textContent=`${currentOpenMission()} / ${missions.length}`;
+  statusStat.textContent=teacherMode?'Mode Guru':rank();
+  renderBadges();
+}
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2100); }
+function showFeedback(ok,msg){
+  let extra='';
+  if(!ok && !teacherMode && activeIndex>=state.completed){
+    state.totalMistakes++;
+    state.attempts[activeIndex]=(state.attempts[activeIndex]||0)+1;
+    if(state.attempts[activeIndex]>=2) extra=`<div class="auto-hint">💡 <b>Petunjuk otomatis:</b> ${getHint()}</div>`;
+    save();
+  }
+  feedback.className='feedback show '+(ok?'ok':'bad'); feedback.innerHTML=msg+extra;
+}
+function hideFeedback(){ feedback.className='feedback'; feedback.innerHTML=''; nextBtn.classList.remove('show'); retryBtn.classList.add('hidden'); }
+
+function renderMissions(){
+  missionGrid.innerHTML='';
+  missions.forEach((m,mi)=>{
+    const open=missionOpen(mi), done=missionDone(mi);
+    const card=document.createElement('article');
+    card.className='mission-card '+(open?'active':'locked');
+    let dots='';
+    for(let e=0;e<3;e++){
+      const g=mi*3+e;
+      dots+=`<span class="dot ${state.completed>g?'done':state.completed===g?'current':''}"></span>`;
+    }
+    card.innerHTML=`
+      <div class="mission-top"><div class="mission-icon">${m.icon}</div><div class="lock">${done?'✅':teacherMode?'👨‍🏫':open?'🔓':'🔒'}</div></div>
+      <h3>Misi ${mi+1} — ${m.title}</h3><p>${m.desc}</p>
+      <div class="mission-mini">${dots}</div>
+      <button class="mission-open" ${open?'':'disabled'}>${teacherMode?'Buka Misi':done?'Lihat Misi':open?'Buka Misi':'Terkunci'}</button>
+      ${teacherMode?`<div class="teacher-ex-links">${[0,1,2].map(e=>`<button type="button" class="teacher-ex-btn" data-ex="${e}">Latihan ${e+1}</button>`).join('')}</div>`:''}`;
+    card.querySelector('.mission-open').addEventListener('click',()=>{
+      if(!open) return;
+      const start = teacherMode ? mi*3 : (done ? mi*3 : Math.max(mi*3, Math.min(state.completed,mi*3+2)));
+      openExercise(start);
+    });
+    if(teacherMode){
+      card.querySelectorAll('.teacher-ex-btn').forEach(btn=>btn.addEventListener('click',()=>openExercise(mi*3+Number(btn.dataset.ex))));
+    }
+    missionGrid.appendChild(card);
+  });
+}
+
+function openExercise(idx){
+  if(idx>state.completed && !teacherMode) return toast('Selesaikan latihan sebelumnya dulu 🔒');
+  activeIndex=idx;
+  if(currentCleanup) currentCleanup();
+  hideFeedback();
+  const {m,e}=idxToME(idx), mission=missions[m], ex=mission.exercises[e];
+  $('#exerciseMissionLabel').textContent=`Misi ${m+1} — ${mission.title}`;
+  $('#exerciseTitle').textContent=ex.title;
+  $('#exerciseDesc').textContent=ex.desc;
+  $('#exerciseStep').textContent=`Latihan ${e+1} dari 3`;
+  exerciseShell.classList.remove('hidden');
+  buildExercise(ex,idx);
+  setTimeout(()=>exerciseShell.scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+function completeExercise(){
+  if(teacherMode){
+    showFeedback(true,'✅ <b>Berhasil!</b> Mode Guru: progres siswa tidak diubah.');
+    nextBtn.classList.add('show');
+    nextBtn.textContent=activeIndex<TOTAL-1?'Latihan Berikutnya ➜':'Kembali ke Peta Misi';
+    return;
+  }
+  if(activeIndex===state.completed){
+    const before=earnedBadges().length;
+    state.completed++;
+    save(); updateStats(); renderMissions();
+    const after=earnedBadges();
+    if(after.length>before){
+      const b=after[after.length-1];
+      toast(`${b.icon} Badge terbuka: ${b.name}!`);
+    }
+  }
+  showFeedback(true,'✅ <b>Berhasil!</b> Latihan selesai. Kamu mendapat <b>100 XP</b>.');
+  nextBtn.classList.add('show');
+  if(state.completed>=TOTAL){
+    nextBtn.textContent='Lihat Hasil 🏆';
+  } else {
+    nextBtn.textContent='Lanjut ➜';
+  }
+}
+
+nextBtn.addEventListener('click',()=>{
+  if(teacherMode){
+    if(activeIndex<TOTAL-1) openExercise(activeIndex+1);
+    else $('#missionSection').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  if(state.completed>=TOTAL){ renderFinish(); $('#finishOverlay').classList.remove('hidden'); return; }
+  openExercise(state.completed);
+});
+retryBtn.addEventListener('click',()=>openExercise(activeIndex));
+
+function randPos(targetW=58,targetH=58){
+  const w=Math.max(220, playArea.clientWidth-80), h=240;
+  return {left:Math.floor(Math.random()*(w-targetW))+10, top:Math.floor(Math.random()*(h-targetH))+10};
+}
+
+function buildExercise(ex,idx){
+  currentCleanup=null;
+  playArea.innerHTML='';
+  if(ex.type==='clickStart') return buildClickStart();
+  if(ex.type==='movingTargets') return buildMovingTargets(ex.count);
+  if(ex.type==='dbl') return buildDouble(ex.target,false);
+  if(ex.type==='dblMixed') return buildDouble(ex.target,true);
+  if(ex.type==='rightClick') return buildRightClick(ex.target,ex.mixed);
+  if(ex.type==='marqueeSelect') return buildMarqueeSelect(ex.targets,ex.layout);
+  if(ex.type==='multiMove') return buildMultiMove(ex.targets,ex.level);
+  if(ex.type==='drag') return buildDrag(ex.pairs);
+  if(ex.type==='resizeObject') return buildResizeObject(ex.start,ex.target);
+  if(ex.type==='scrollOne') return buildScrollOne();
+  if(ex.type==='scrollRound') return buildScrollRound();
+  if(ex.type==='scrollSecrets') return buildScrollSecrets();
+  if(ex.type==='precision') return buildPrecision(ex.targetCount,ex.decoyCount,ex.size);
+  if(ex.type==='maze') return buildMaze(ex.level);
+  if(ex.type==='typing') return buildTyping(ex.text);
+  if(ex.type==='shiftSymbol') return buildShiftSymbol(ex.symbol,ex.keyLabel);
+  if(ex.type==='editTyping') return buildEditTyping(ex.initial,ex.answer);
+  if(ex.type==='multiline') return buildMultiline(ex.text);
+}
+
+function buildClickStart(){
+  playArea.innerHTML=`<div class="tip">💡 Gunakan <b>klik kiri satu kali</b> pada tombol.</div><div class="center-stage"><button class="big-target">MULAI</button></div>`;
+  playArea.querySelector('.big-target').onclick=completeExercise;
+}
+function buildMovingTargets(count){
+  let hit=0;
+  playArea.innerHTML=`<div class="tip">🎯 Klik target yang muncul. Target akan berpindah setelah berhasil diklik.</div><div class="target-zone"><button class="moving-target">🎯</button></div><div class="char-hint">Target: <b id="hitCount">0</b> / ${count}</div>`;
+  const zone=playArea.querySelector('.target-zone'), target=playArea.querySelector('.moving-target'), hitCount=playArea.querySelector('#hitCount');
+  function move(){ const maxX=zone.clientWidth-70,maxY=zone.clientHeight-70; target.style.left=(10+Math.random()*Math.max(20,maxX-10))+'px';target.style.top=(10+Math.random()*Math.max(20,maxY-10))+'px'; }
+  target.onclick=()=>{hit++;hitCount.textContent=hit;if(hit>=count){target.disabled=true;completeExercise();}else move();};
+  setTimeout(move,20);
+}
+function buildDouble(targetName,mixed){
+  const icons=mixed?['Folder','Gambar','Musik','Dokumen','Video','Catatan']:[targetName];
+  const em={Folder:'📁',Dokumen:'📄',Gambar:'🖼️',Musik:'🎵',Video:'🎬',Catatan:'📝'};
+  playArea.innerHTML=`<div class="tip">⚡ Klik <b>dua kali dengan cepat</b> pada ikon <b>${targetName}</b>.</div><div class="icon-grid">${icons.map(n=>`<div class="desktop-icon" data-name="${n}"><span>${em[n]}</span><b>${n}</b></div>`).join('')}</div>`;
+  playArea.querySelectorAll('.desktop-icon').forEach(el=>{
+    el.addEventListener('dblclick',()=>{
+      if(el.dataset.name===targetName) completeExercise();
+      else showFeedback(false,'🔎 Bukan ikon yang diminta. Cari <b>'+targetName+'</b>.');
+    });
+  });
+}
+function buildRightClick(targetName,mixed){
+  const icons=mixed?['Folder','Gambar','Musik','Dokumen','Video','Catatan']:[targetName];
+  const em={Folder:'📁',Dokumen:'📄',Gambar:'🖼️',Musik:'🎵',Video:'🎬',Catatan:'📝'};
+  playArea.innerHTML=`<div class="tip">🖱️ Gunakan <b>tombol kanan mouse</b> satu kali pada ikon <b>${targetName}</b>. Menu klik kanan browser tidak akan muncul di area latihan.</div><div class="icon-grid">${icons.map(n=>`<div class="desktop-icon" data-name="${n}"><span>${em[n]}</span><b>${n}</b></div>`).join('')}</div><div class="char-hint">Petunjuk: tombol kanan mouse biasanya berada di sisi kanan mouse.</div>`;
+  playArea.querySelectorAll('.desktop-icon').forEach(el=>{
+    el.addEventListener('contextmenu',e=>{
+      e.preventDefault();
+      if(el.dataset.name===targetName){
+        el.style.background='#eaf9f3';
+        el.style.borderColor='#98dec2';
+        completeExercise();
+      } else {
+        showFeedback(false,'🔎 Ikon itu bukan yang diminta. Klik kanan pada <b>'+targetName+'</b>.');
+      }
+    });
+  });
+}
+
+function buildMarqueeSelect(targets,layout){
+  const all = layout==='single'
+    ? ['Folder','Dokumen','Gambar','Musik','Video','Catatan']
+    : layout==='pair'
+      ? ['Folder','Dokumen','Gambar','Musik','Video','Catatan']
+      : ['Gambar','Musik','Video','Folder','Dokumen','Catatan'];
+  const em={Folder:'📁',Dokumen:'📄',Gambar:'🖼️',Musik:'🎵',Video:'🎬',Catatan:'📝'};
+  const targetText=targets.join(' + ');
+  playArea.innerHTML=`<div class="tip">▧ <b>Cara:</b> klik area kosong, <b>tahan klik kiri</b>, lalu geser hingga kotak biru menutupi <b>${targetText}</b>. Lepaskan klik untuk memeriksa.</div>
+    <div class="select-stage" id="selectStage">
+      <div class="select-grid">${all.map(n=>`<div class="select-object" data-name="${n}"><span class="obj-icon">${em[n]}</span><b>${n}</b></div>`).join('')}</div>
+      <div class="selection-box" id="selectionBox"></div>
+    </div>
+    <div class="select-status">Target: <b>${targetText}</b> · Pilihanmu: <b id="selectionCount">0 objek</b></div>`;
+
+  const stage=playArea.querySelector('#selectStage');
+  const box=playArea.querySelector('#selectionBox');
+  const status=playArea.querySelector('#selectionCount');
+  const objects=[...playArea.querySelectorAll('.select-object')];
+  let dragging=false,startX=0,startY=0,pointerId=null;
+
+  function clearSelection(){
+    objects.forEach(o=>o.classList.remove('selected'));
+    status.textContent='0 objek';
+  }
+  function rectFromPoints(x1,y1,x2,y2){
+    return {left:Math.min(x1,x2),top:Math.min(y1,y2),right:Math.max(x1,x2),bottom:Math.max(y1,y2),width:Math.abs(x2-x1),height:Math.abs(y2-y1)};
+  }
+  function intersect(a,b){
+    return !(a.right<b.left || a.left>b.right || a.bottom<b.top || a.top>b.bottom);
+  }
+  function updateSelection(r){
+    const srect=stage.getBoundingClientRect();
+    let count=0;
+    objects.forEach(o=>{
+      const or=o.getBoundingClientRect();
+      const local={left:or.left-srect.left,top:or.top-srect.top,right:or.right-srect.left,bottom:or.bottom-srect.top};
+      const hit=intersect(r,local);
+      o.classList.toggle('selected',hit);
+      if(hit) count++;
+    });
+    status.textContent=`${count} objek`;
+  }
+  function finishSelection(){
+    const selected=objects.filter(o=>o.classList.contains('selected')).map(o=>o.dataset.name).sort();
+    const expected=[...targets].sort();
+    const exact=selected.length===expected.length && selected.every((v,i)=>v===expected[i]);
+    if(exact){
+      completeExercise();
+    } else {
+      const got=selected.length?selected.join(', '):'belum ada objek';
+      showFeedback(false,`🔎 Pilihanmu: <b>${got}</b>. Coba buat kotak seleksi yang hanya mencakup <b>${targetText}</b>.`);
+    }
+  }
+
+  const onDown=e=>{
+    if(e.button!==0) return;
+    // Must begin on empty stage, not directly on an object.
+    if(e.target.closest('.select-object')){
+      showFeedback(false,'🔎 Mulailah dari <b>area kosong</b>, bukan langsung di atas ikon.');
+      return;
+    }
+    e.preventDefault();
+    clearSelection();
+    const r=stage.getBoundingClientRect();
+    startX=Math.max(0,Math.min(stage.clientWidth,e.clientX-r.left));
+    startY=Math.max(0,Math.min(stage.clientHeight,e.clientY-r.top));
+    dragging=true; pointerId=e.pointerId;
+    if(stage.setPointerCapture) stage.setPointerCapture(pointerId);
+    box.style.display='block';
+    box.style.left=startX+'px';box.style.top=startY+'px';box.style.width='0px';box.style.height='0px';
+  };
+  const onMove=e=>{
+    if(!dragging || e.pointerId!==pointerId) return;
+    e.preventDefault();
+    const sr=stage.getBoundingClientRect();
+    const x=Math.max(0,Math.min(stage.clientWidth,e.clientX-sr.left));
+    const y=Math.max(0,Math.min(stage.clientHeight,e.clientY-sr.top));
+    const rr=rectFromPoints(startX,startY,x,y);
+    box.style.left=rr.left+'px';box.style.top=rr.top+'px';box.style.width=rr.width+'px';box.style.height=rr.height+'px';
+    updateSelection(rr);
+  };
+  const onUp=e=>{
+    if(!dragging || e.pointerId!==pointerId) return;
+    e.preventDefault();
+    dragging=false;
+    if(stage.releasePointerCapture){try{stage.releasePointerCapture(pointerId)}catch(_){}}
+    box.style.display='none';
+    pointerId=null;
+    finishSelection();
+  };
+  stage.addEventListener('pointerdown',onDown);
+  stage.addEventListener('pointermove',onMove);
+  stage.addEventListener('pointerup',onUp);
+  stage.addEventListener('pointercancel',onUp);
+  stage.addEventListener('contextmenu',e=>e.preventDefault());
+  currentCleanup=()=>{
+    stage.removeEventListener('pointerdown',onDown);
+    stage.removeEventListener('pointermove',onMove);
+    stage.removeEventListener('pointerup',onUp);
+    stage.removeEventListener('pointercancel',onUp);
+  };
+}
+
+
+function buildMultiMove(targets,level){
+  const names=['Foto','Dokumen','Musik','Video','Catatan','Folder'];
+  const icons={Foto:'🖼️',Dokumen:'📄',Musik:'🎵',Video:'🎬',Catatan:'📝',Folder:'📁'};
+  const positions=[
+    [28,38],[145,54],[70,165],[205,180],[330,58],[350,190]
+  ];
+  playArea.innerHTML=`<div class="tip">📦 <b>Langkah 1:</b> buat kotak seleksi untuk memilih <b>${targets.join(', ')}</b>. <b>Langkah 2:</b> setelah semuanya tersorot, klik-tahan salah satu objek terpilih lalu seret seluruh kelompok ke <b>Folder Tugas</b>.</div>
+    <div class="multi-stage" id="multiStage">
+      ${names.map((n,i)=>`<div class="multi-file" data-name="${n}" style="left:${positions[i][0]}px;top:${positions[i][1]}px"><span>${icons[n]}</span><b>${n}</b></div>`).join('')}
+      <div class="multi-destination" id="multiDestination">📁<br>FOLDER TUGAS<br><small>Taruh semua objek di sini</small></div>
+      <div class="multi-select-box" id="multiSelectBox"></div>
+    </div>
+    <div class="multi-instruction" id="multiStatus">Belum ada objek dipilih.</div>`;
+  const stage=playArea.querySelector('#multiStage'), box=playArea.querySelector('#multiSelectBox'), dest=playArea.querySelector('#multiDestination'), status=playArea.querySelector('#multiStatus');
+  const files=[...playArea.querySelectorAll('.multi-file')];
+  let mode='select', selecting=false, dragging=false, pointerId=null, sx=0,sy=0,lastX=0,lastY=0;
+  const expected=[...targets].sort();
+  function stagePos(e){const r=stage.getBoundingClientRect();return {x:(e.clientX-r.left)*(stage.clientWidth/r.width),y:(e.clientY-r.top)*(stage.clientHeight/r.height)}}
+  function selectedNames(){return files.filter(f=>f.classList.contains('selected')).map(f=>f.dataset.name).sort()}
+  function exactSelection(){const a=selectedNames();return a.length===expected.length&&a.every((v,i)=>v===expected[i])}
+  function intersect(a,b){return !(a.right<b.left||a.left>b.right||a.bottom<b.top||a.top>b.bottom)}
+  function clearSel(){files.forEach(f=>f.classList.remove('selected'));}
+  function updateSelection(r){
+    files.forEach(f=>{const fr={left:f.offsetLeft,top:f.offsetTop,right:f.offsetLeft+f.offsetWidth,bottom:f.offsetTop+f.offsetHeight};f.classList.toggle('selected',intersect(r,fr));});
+    status.textContent=`Dipilih: ${selectedNames().join(', ')||'belum ada'}`;
+  }
+  function inDestination(){
+    const dr={left:dest.offsetLeft,top:dest.offsetTop,right:dest.offsetLeft+dest.offsetWidth,bottom:dest.offsetTop+dest.offsetHeight};
+    return files.filter(f=>f.classList.contains('selected')).every(f=>{
+      const cx=f.offsetLeft+f.offsetWidth/2, cy=f.offsetTop+f.offsetHeight/2; return cx>=dr.left&&cx<=dr.right&&cy>=dr.top&&cy<=dr.bottom;
+    });
+  }
+  const down=e=>{
+    if(e.button!==0) return;
+    const file=e.target.closest('.multi-file');
+    const p=stagePos(e);
+    if(file && file.classList.contains('selected') && exactSelection()){
+      e.preventDefault(); dragging=true; mode='move'; pointerId=e.pointerId; lastX=p.x;lastY=p.y; files.filter(f=>f.classList.contains('selected')).forEach(f=>f.classList.add('moving')); if(stage.setPointerCapture)stage.setPointerCapture(pointerId); return;
+    }
+    if(file){showFeedback(false,'🔎 Buat kotak seleksi dari <b>area kosong</b> terlebih dahulu.');return;}
+    e.preventDefault(); clearSel(); selecting=true;mode='select';pointerId=e.pointerId;sx=p.x;sy=p.y;if(stage.setPointerCapture)stage.setPointerCapture(pointerId);box.style.display='block';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0';box.style.height='0';
+  };
+  const move=e=>{
+    if(e.pointerId!==pointerId) return; const p=stagePos(e);
+    if(selecting){e.preventDefault();const r={left:Math.min(sx,p.x),top:Math.min(sy,p.y),right:Math.max(sx,p.x),bottom:Math.max(sy,p.y)};box.style.left=r.left+'px';box.style.top=r.top+'px';box.style.width=(r.right-r.left)+'px';box.style.height=(r.bottom-r.top)+'px';updateSelection(r);}
+    if(dragging){e.preventDefault();const dx=p.x-lastX,dy=p.y-lastY;files.filter(f=>f.classList.contains('selected')).forEach(f=>{f.style.left=Math.max(0,Math.min(stage.clientWidth-f.offsetWidth,f.offsetLeft+dx))+'px';f.style.top=Math.max(0,Math.min(stage.clientHeight-f.offsetHeight,f.offsetTop+dy))+'px';});lastX=p.x;lastY=p.y;}
+  };
+  const up=e=>{
+    if(e.pointerId!==pointerId)return;
+    if(selecting){selecting=false;box.style.display='none'; if(!exactSelection())showFeedback(false,`🔎 Pilih hanya <b>${targets.join(', ')}</b>.`);else status.innerHTML='✅ Seleksi benar. Sekarang <b>klik-tahan salah satu objek terpilih</b> lalu seret semuanya ke Folder Tugas.';}
+    if(dragging){dragging=false;files.forEach(f=>f.classList.remove('moving'));if(inDestination())completeExercise();else showFeedback(false,'🔎 Kelompok belum berada di dalam <b>Folder Tugas</b>. Coba seret lagi.');}
+    if(stage.releasePointerCapture){try{stage.releasePointerCapture(pointerId)}catch(_){}} pointerId=null;
+  };
+  stage.addEventListener('pointerdown',down);stage.addEventListener('pointermove',move);stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);stage.addEventListener('contextmenu',e=>e.preventDefault());
+  currentCleanup=()=>{stage.removeEventListener('pointerdown',down);stage.removeEventListener('pointermove',move);stage.removeEventListener('pointerup',up);stage.removeEventListener('pointercancel',up);};
+}
+
+function buildResizeObject(start,target){
+  const [sw,sh]=start,[tw,th]=target,tol=14;
+  playArea.innerHTML=`<div class="tip">↘️ Tarik <b>handle biru di sudut kanan bawah</b>. Klik-tahan lalu geser sampai jendela biru sama besar dengan garis target hijau.</div>
+    <div class="resize-stage" id="resizeStage">
+      <div class="resize-target" style="width:${tw}px;height:${th}px"></div>
+      <div class="resize-window" id="resizeWindow" style="width:${sw}px;height:${sh}px">
+        <div class="resize-titlebar">Jendela Latihan</div><div class="resize-body">Tarik sudut kanan bawah untuk mengubah ukuran.</div><div class="resize-handle" id="resizeHandle" aria-label="Handle resize"></div>
+      </div>
+    </div><div class="resize-size">Ukuran: <b id="resizeReadout">${sw} × ${sh}</b> · Target: <b>${tw} × ${th}</b></div>`;
+  const stage=playArea.querySelector('#resizeStage'),win=playArea.querySelector('#resizeWindow'),handle=playArea.querySelector('#resizeHandle'),read=playArea.querySelector('#resizeReadout');
+  let dragging=false,pid=null,startX=0,startY=0,startW=sw,startH=sh;
+  const down=e=>{if(e.button!==0)return;e.preventDefault();dragging=true;pid=e.pointerId;startX=e.clientX;startY=e.clientY;startW=win.offsetWidth;startH=win.offsetHeight;if(handle.setPointerCapture)handle.setPointerCapture(pid);};
+  const move=e=>{if(!dragging||e.pointerId!==pid)return;e.preventDefault();const scaleX=stage.clientWidth/stage.getBoundingClientRect().width,scaleY=stage.clientHeight/stage.getBoundingClientRect().height;const w=Math.max(120,Math.min(650,startW+(e.clientX-startX)*scaleX));const h=Math.max(80,Math.min(250,startH+(e.clientY-startY)*scaleY));win.style.width=w+'px';win.style.height=h+'px';read.textContent=`${Math.round(w)} × ${Math.round(h)}`;};
+  const up=e=>{if(!dragging||e.pointerId!==pid)return;dragging=false;if(handle.releasePointerCapture){try{handle.releasePointerCapture(pid)}catch(_){}}const w=win.offsetWidth,h=win.offsetHeight;if(Math.abs(w-tw)<=tol&&Math.abs(h-th)<=tol){win.style.width=tw+'px';win.style.height=th+'px';read.textContent=`${tw} × ${th}`;completeExercise();}else showFeedback(false,`🔎 Belum pas. Dekatkan ukuran ke <b>${tw} × ${th}</b>.`);pid=null;};
+  handle.addEventListener('pointerdown',down);handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',up);handle.addEventListener('pointercancel',up);
+  currentCleanup=()=>{handle.removeEventListener('pointerdown',down);handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',up);handle.removeEventListener('pointercancel',up);};
+}
+
+function buildDrag(pairs){
+  let matched=0;
+  const shuffled=[...pairs].sort(()=>Math.random()-.5);
+  playArea.innerHTML=`<div class="tip">🧲 Klik dan tahan benda, lalu seret ke tempat yang sesuai.</div>
+  <div class="drag-layout"><div class="items-box"><b>Benda</b><div class="drag-items">${shuffled.map((p,i)=>`<div class="drag-item" draggable="true" data-target="${p[1]}">${p[0]}</div>`).join('')}</div></div>
+  <div class="drop-boxes"><b>Tempat</b><div class="drop-list">${pairs.map(p=>`<div class="drop-zone" data-zone="${p[1]}"><span>${p[1]}</span><small>Seret ke sini</small></div>`).join('')}</div></div></div>`;
+  playArea.querySelectorAll('.drag-item').forEach(item=>{
+    item.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',item.dataset.target));
+  });
+  playArea.querySelectorAll('.drop-zone').forEach(zone=>{
+    zone.addEventListener('dragover',e=>e.preventDefault());
+    zone.addEventListener('drop',e=>{
+      e.preventDefault();const t=e.dataTransfer.getData('text/plain');
+      if(t===zone.dataset.zone && !zone.classList.contains('filled')){
+        const item=[...playArea.querySelectorAll('.drag-item')].find(i=>i.dataset.target===t);
+        zone.classList.add('filled'); zone.querySelector('small').textContent='✅ Tepat';
+        if(item) item.remove(); matched++; if(matched===pairs.length) completeExercise();
+      }else showFeedback(false,'🔎 Tempatnya belum tepat. Coba pasangan lain.');
+    });
+  });
+}
+function buildScrollOne(){
+  playArea.innerHTML=`<div class="tip">🛞 <b>Dua cara:</b> putar wheel mouse <b>atau</b> klik-tahan scrollbar di sisi kanan kotak lalu geser ke bawah.</div><div class="scroll-box"><div class="scroll-spacer">Gulir ke bawah dengan wheel / scrollbar ↓</div><button class="secret-btn">TEMUKAN AKU!</button></div>`;
+  playArea.querySelector('.secret-btn').onclick=completeExercise;
+}
+function buildScrollRound(){
+  playArea.innerHTML=`<div class="tip">↕️ <b>Latihan scrollbar:</b> klik dan tahan batang scrollbar di sisi kanan kotak, geser ke bawah. Setelah klik tombol bawah, geser scrollbar kembali ke atas. <span style="font-weight:600">Wheel tetap boleh dipakai jika diperlukan.</span></div><div class="scroll-box" id="sb"><button class="secret-btn" id="topBtn" disabled>KEMBALI KE ATAS!</button><div class="scroll-spacer">↓ Seret scrollbar ke bawah ↓</div><button class="secret-btn" id="bottomBtn">SAYA SUDAH DI BAWAH</button></div>`;
+  const sb=playArea.querySelector('#sb'),top=playArea.querySelector('#topBtn'),bottom=playArea.querySelector('#bottomBtn');
+  bottom.onclick=()=>{bottom.classList.add('found');bottom.textContent='✅ Sekarang kembali ke atas';top.disabled=false;sb.scrollTo({top:0,behavior:'smooth'});};
+  top.onclick=()=>completeExercise();
+}
+function buildScrollSecrets(){
+  const words=['KOMPUTER','KKA','TEKNOLOGI'];let found=new Set();
+  playArea.innerHTML=`<div class="tip">🔎 Temukan 3 kata rahasia. Kamu boleh <b>putar wheel</b> atau <b>seret scrollbar</b> di sisi kanan. Coba gunakan keduanya.</div><div class="scroll-box"><div class="scroll-spacer">Cari kata pertama...</div><button class="secret-btn" data-secret="KOMPUTER">KOMPUTER</button><div class="scroll-spacer">Lanjutkan mencari...</div><button class="secret-btn" data-secret="KKA">KKA</button><div class="scroll-spacer">Masih ada satu lagi...</div><button class="secret-btn" data-secret="TEKNOLOGI">TEKNOLOGI</button></div><div class="char-hint">Ditemukan: <b id="foundCount">0</b> / 3</div>`;
+  playArea.querySelectorAll('[data-secret]').forEach(b=>b.onclick=()=>{found.add(b.dataset.secret);b.classList.add('found');b.textContent='✅ '+b.dataset.secret;playArea.querySelector('#foundCount').textContent=found.size;if(found.size===3)completeExercise();});
+}
+
+function buildPrecision(targetCount,decoyCount,size){
+  let found=0;
+  playArea.innerHTML=`<div class="tip">🎯 Klik semua <b>bintang kuning</b> yang tersedia. Latihan ini melatih ketelitian mengarahkan pointer mouse. Hindari lingkaran biru.</div><div class="precision-stage" id="precisionStage"></div><div class="char-hint">Ditemukan: <b id="precisionCount">0</b> / ${targetCount}</div>`;
+  const stage=playArea.querySelector('#precisionStage');
+  const counter=playArea.querySelector('#precisionCount');
+  const items=[];
+  const stageW=760, stageH=320;
+  function overlaps(a,b,pad=8){ return !(a.x+a.w+pad<b.x || a.x>b.x+b.w+pad || a.y+a.h+pad<b.y || a.y>b.y+b.h+pad); }
+  function place(w,h){
+    for(let tries=0;tries<500;tries++){
+      const item={x:Math.floor(Math.random()*(stageW-w-16))+8, y:Math.floor(Math.random()*(stageH-h-16))+8, w,h};
+      if(items.every(other=>!overlaps(item,other,10))) return item;
+    }
+    return {x:8+items.length*12,y:8+items.length*10,w,h};
+  }
+  function addEl(cls,label,isTarget){
+    const p=place(size,size); items.push(p);
+    const el=document.createElement('button');
+    el.type='button';
+    el.className=cls;
+    el.style.left=p.x+'px'; el.style.top=p.y+'px'; el.style.width=size+'px'; el.style.height=size+'px';
+    el.innerHTML=label;
+    el.addEventListener('click',()=>{
+      if(isTarget){
+        if(el.classList.contains('done')) return;
+        el.classList.add('done'); el.disabled=true; el.innerHTML='✓'; found++; counter.textContent=found;
+        if(found===targetCount) completeExercise();
+      } else {
+        showFeedback(false,'🔎 Itu bukan target yang diminta. Klik <b>bintang kuning</b>, bukan lingkaran biru.');
+      }
+    });
+    stage.appendChild(el);
+  }
+  for(let i=0;i<targetCount;i++) addEl('precision-target','★',true);
+  for(let i=0;i<decoyCount;i++) addEl('precision-decoy','●',false);
+}
+
+function buildMaze(level){
+  const configs={
+    1:{width:54, points:[[70,220],[170,220],[170,140],[310,140],[310,210],[470,210],[470,110],[650,110]]},
+    2:{width:42, points:[[70,230],[150,230],[150,90],[290,90],[290,180],[410,180],[410,70],[560,70],[560,190],[660,190]]},
+    3:{width:32, points:[[65,230],[130,230],[130,120],[235,120],[235,210],[330,210],[330,95],[450,95],[450,205],[560,205],[560,125],[665,125]]}
+  };
+  const cfg=configs[level] || configs[1];
+  playArea.innerHTML=`<div class="tip">🛣️ Klik dan tahan <b>tombol kiri mouse</b> pada lingkaran <b>START</b>, lalu gerakkan mouse mengikuti jalur sampai <b>FINISH</b>. Jangan keluar dari jalur, dan jangan lepaskan klik sebelum selesai.</div><div class="maze-wrap"><div class="maze-board"><canvas class="maze-canvas" id="mazeCanvas" width="760" height="290"></canvas></div><div class="maze-legend">START = hijau · FINISH = merah · Tetap tahan klik kiri selama bergerak.</div></div>`;
+  const canvas=playArea.querySelector('#mazeCanvas');
+  const ctx=canvas.getContext('2d');
+  const start={x:cfg.points[0][0], y:cfg.points[0][1], r:20};
+  const finish={x:cfg.points[cfg.points.length-1][0], y:cfg.points[cfg.points.length-1][1], r:20};
+  const path=new Path2D();
+  path.moveTo(cfg.points[0][0], cfg.points[0][1]);
+  for(let i=1;i<cfg.points.length;i++) path.lineTo(cfg.points[i][0], cfg.points[i][1]);
+  function draw(active=false){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#fbfcff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.lineCap='round'; ctx.lineJoin='round'; ctx.lineWidth=cfg.width+12; ctx.strokeStyle='#dfe7fb'; ctx.stroke(path);
+    ctx.lineWidth=cfg.width; ctx.strokeStyle=active?'#6f97ff':'#86a7ff'; ctx.stroke(path);
+    ctx.fillStyle='#25b86f'; ctx.beginPath(); ctx.arc(start.x,start.y,start.r,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 12px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('START',start.x,start.y);
+    ctx.fillStyle='#ef5b62'; ctx.beginPath(); ctx.arc(finish.x,finish.y,finish.r,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.fillText('FINISH',finish.x,finish.y);
+  }
+  draw(false);
+  let tracking=false, pointerId=null;
+  function getPos(e){ const r=canvas.getBoundingClientRect(); return {x:(e.clientX-r.left)*(canvas.width/r.width), y:(e.clientY-r.top)*(canvas.height/r.height)}; }
+  function inCircle(p,c){ return Math.hypot(p.x-c.x,p.y-c.y) <= c.r+6; }
+  function reset(msg){ tracking=false; pointerId=null; draw(false); if(msg) showFeedback(false,msg); }
+  const onDown=e=>{ if(e.button!==0) return; const p=getPos(e); if(!inCircle(p,start)){ showFeedback(false,'🔎 Mulailah dari lingkaran <b>START</b>.'); return; } e.preventDefault(); tracking=true; pointerId=e.pointerId; if(canvas.setPointerCapture) canvas.setPointerCapture(pointerId); draw(true); };
+  const onMove=e=>{ if(!tracking || e.pointerId!==pointerId) return; const p=getPos(e); if(inCircle(p,finish)){ tracking=false; if(canvas.releasePointerCapture){try{canvas.releasePointerCapture(pointerId)}catch(_){}} draw(true); completeExercise(); return; } if(!ctx.isPointInStroke(path,p.x,p.y) && !inCircle(p,start)){ reset('🔎 Kursor keluar dari jalur. Coba lagi dan gerakkan mouse lebih pelan.'); } };
+  const onUp=e=>{ if(!tracking || e.pointerId!==pointerId) return; reset('🔎 Tahan klik kiri sampai mencapai <b>FINISH</b>.'); };
+  canvas.addEventListener('pointerdown',onDown);
+  canvas.addEventListener('pointermove',onMove);
+  canvas.addEventListener('pointerup',onUp);
+  canvas.addEventListener('pointercancel',onUp);
+  currentCleanup=()=>{ canvas.removeEventListener('pointerdown',onDown); canvas.removeEventListener('pointermove',onMove); canvas.removeEventListener('pointerup',onUp); canvas.removeEventListener('pointercancel',onUp); };
+}
+
+function buildTyping(text){
+  playArea.innerHTML=`<div class="tip">⌨️ Ketik <b>persis</b> seperti contoh. Perhatikan huruf besar, spasi, dan simbol.</div><div class="typing-wrap"><div class="sample-text">${escapeHtml(text)}</div><input class="type-input" autocomplete="off" spellcheck="false" placeholder="Ketik di sini..."><div class="char-hint">Tekan Enter untuk memeriksa.</div></div>`;
+  const inp=playArea.querySelector('.type-input'); setTimeout(()=>inp.focus(),150);
+  const check=()=>{ if(inp.value===text) completeExercise(); else showFeedback(false,'🔎 Belum sama dengan contoh. Periksa lagi huruf, spasi, atau simbol.'); };
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();check();}});
+}
+function buildShiftSymbol(symbol,keyLabel){
+  playArea.innerHTML=`<div class="tip">✨ Tekan kedua tombol <b>bersamaan</b>. Tahan <b>Shift</b>, lalu tekan <b>${keyLabel}</b>.</div>
+  <div class="typing-wrap">
+    <div class="key-combo"><div class="keycap">Shift</div><div class="combo-plus">+</div><div class="keycap">${keyLabel}</div></div>
+    <div class="char-hint">Target simbol:</div>
+    <div class="symbol-result" id="symbolResult">${escapeHtml(symbol)}</div>
+    <div class="char-hint">Latihan berhasil hanya jika tombol <b>Shift</b> benar-benar digunakan.</div>
+  </div>`;
+  const result=playArea.querySelector('#symbolResult');
+  let done=false;
+  const handler=(e)=>{
+    if(done) return;
+    if(e.shiftKey && e.key===symbol){
+      e.preventDefault();
+      done=true;
+      result.classList.add('success');
+      result.textContent='✓ '+symbol;
+      document.removeEventListener('keydown',handler,true);
+      completeExercise();
+    } else if(e.key===symbol && !e.shiftKey){
+      e.preventDefault();
+      showFeedback(false,'🔎 Simbolnya benar, tetapi coba gunakan tombol <b>Shift</b> bersama tombol angka.');
+    }
+  };
+  document.addEventListener('keydown',handler,true);
+  currentCleanup=()=>document.removeEventListener('keydown',handler,true);
+}
+
+function buildEditTyping(initial,answer){
+  playArea.innerHTML=`<div class="tip">⌫ Teks sudah berisi kesalahan. Gunakan <b>Backspace</b> untuk memperbaikinya.</div><div class="typing-wrap"><div class="sample-text">Target: ${escapeHtml(answer)}</div><input class="type-input" value="${escapeAttr(initial)}" spellcheck="false"><div class="char-hint">Perbaiki lalu tekan Enter.</div></div>`;
+  const inp=playArea.querySelector('.type-input'); setTimeout(()=>{inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)},150);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); if(inp.value===answer)completeExercise();else showFeedback(false,'🔎 Masih ada huruf yang belum tepat. Coba periksa lagi.');}});
+}
+function buildMultiline(text){
+  playArea.innerHTML=`<div class="tip">↵ Gunakan <b>Enter</b> untuk membuat baris baru sesuai contoh.</div><div class="typing-wrap"><div class="sample-text" style="white-space:pre-line">${escapeHtml(text)}</div><textarea class="type-input" spellcheck="false" placeholder="Ketik tiga baris di sini..."></textarea><div class="char-hint">Jika sudah sama, tekan Ctrl + Enter untuk memeriksa.</div></div>`;
+  const ta=playArea.querySelector('textarea'); setTimeout(()=>ta.focus(),150);
+  ta.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();if(ta.value.trim()===text)completeExercise();else showFeedback(false,'🔎 Susunan baris belum sama. Gunakan Enter di tempat yang tepat.');}});
+}
+function formatDuration(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  return `${m}m ${String(s).padStart(2,'0')}d`;
+}
+function resultCode(){
+  return `KKA-MK-${String(state.completed).padStart(2,'0')}-${String(state.totalMistakes).padStart(2,'0')}`;
+}
+function renderFinish(){
+  const seconds=Math.max(1,Math.round((Date.now()-sessionStart)/1000));
+  $('#finishStats').innerHTML=`
+    <div class="finish-stat"><small>Latihan selesai</small><b>${state.completed} / ${TOTAL}</b></div>
+    <div class="finish-stat"><small>XP terkumpul</small><b>${state.completed*100} XP</b></div>
+    <div class="finish-stat"><small>Percobaan salah</small><b>${state.totalMistakes}</b></div>
+    <div class="finish-stat"><small>Waktu sesi ini</small><b>${formatDuration(seconds)}</b></div>
+    <div class="finish-stat"><small>Peringkat</small><b>${rank()}</b></div>
+    <div class="finish-stat"><small>Badge</small><b>${earnedBadges().length} / ${BADGES.length}</b></div>
+    <div class="finish-stat"><small>Pemilik file</small><b>${escapeHtml(state.originalFileName||'Belum disimpan')}</b></div>`;
+  $('#finishBadges').innerHTML=earnedBadges().map(b=>`<span class="finish-badge">${b.icon} ${b.name}</span>`).join('');
+  $('#resultCode').textContent=resultCode();
+}
+async function toggleFocus(){
+  try{
+    if(!document.fullscreenElement){ await document.documentElement.requestFullscreen(); }
+    else { await document.exitFullscreen(); }
+  }catch(e){ toast('Mode fokus tidak didukung oleh browser ini.'); }
+}
+function updateFocusButton(){
+  const on=!!document.fullscreenElement;
+  const b=$('#focusBtn'); if(b) b.textContent=on?'⛶ Keluar Mode Fokus':'⛶ Mode Fokus';
+}
+
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function escapeAttr(s){return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}
+
+function setTeacherMessage(el,ok,msg){
+  if(!el) return;
+  el.textContent=msg;
+  el.className='teacher-code-msg '+(ok?'ok':'bad');
+}
+function activateTeacherMode(code,msgEl){
+  if(code!==TEACHER_CODE){
+    setTeacherMessage(msgEl,false,'Kode guru tidak sesuai.');
+    return false;
+  }
+  teacherMode=true;
+  sessionStart=Date.now();
+  $('#startOverlay').classList.add('hidden');
+  $('#teacherToolbar').classList.remove('hidden');
+  setTeacherMessage($('#teacherCodeMsg'),true,'Mode Guru aktif. Semua latihan sudah terbuka.');
+  setTeacherMessage($('#teacherCodeMsgStart'),true,'Mode Guru aktif.');
+  const mainInput=$('#teacherCodeInput'); if(mainInput) mainInput.value='';
+  const startInput=$('#teacherCodeInputStart'); if(startInput) startInput.value='';
+  updateStats(); renderMissions();
+  toast('👨‍🏫 Mode Guru aktif — semua latihan terbuka.');
+  $('#missionSection').scrollIntoView({behavior:'smooth'});
+  return true;
+}
+function deactivateTeacherMode(){
+  teacherMode=false;
+  $('#teacherToolbar').classList.add('hidden');
+  setTeacherMessage($('#teacherCodeMsg'),true,'Mode Guru dinonaktifkan.');
+  updateStats(); renderMissions();
+  if(activeIndex>state.completed) exerciseShell.classList.add('hidden');
+  toast('Mode Guru dinonaktifkan.');
+}
+function resetAllData(){
+  const ok=confirm('RESET SEMUA DATA?\n\nSemua progres tantangan, XP, badge/reward, jumlah kesalahan, Nama File Saat Ini, dan Nama File Pertama/Pemilik akan dihapus. Data ini tidak dapat dikembalikan kecuali kamu memiliki file progres yang pernah disimpan.');
+  if(!ok) return;
+  teacherMode=false;
+  if(currentCleanup){ try{currentCleanup();}catch(_){} currentCleanup=null; }
+  localStorage.removeItem(STORAGE_KEY);
+  state={completed:0,started:false,totalMistakes:0,attempts:{},fileName:'',originalFileName:''};
+  activeIndex=0;
+  sessionStart=Date.now();
+  if(fileNameInput) fileNameInput.value='';
+  if(originalFileNameInput) originalFileNameInput.value='';
+  if(importProgressFileInput) importProgressFileInput.value='';
+  if($('#teacherCodeInput')) $('#teacherCodeInput').value='';
+  if($('#teacherCodeInputStart')) $('#teacherCodeInputStart').value='';
+  $('#teacherToolbar').classList.add('hidden');
+  $('#finishOverlay').classList.add('hidden');
+  exerciseShell.classList.add('hidden');
+  hideFeedback();
+  syncFileIdentityUI();
+  updateStats();
+  renderMissions();
+  setFileMessage(true,'Semua data telah direset. Nama file pertama akan kembali terkunci setelah Save pertama.');
+  $('#startOverlay').classList.remove('hidden');
+  toast('🗑️ Semua data berhasil direset.');
+}
+function beginGame(){
+  state.started=true; save(); sessionStart=Date.now();
+  $('#startOverlay').classList.add('hidden');
+  openExercise(Math.min(state.completed,TOTAL-1));
+}
+if(fileNameInput){
+  fileNameInput.value=state.fileName||'';
+  fileNameInput.addEventListener('input',()=>{ state.fileName=sanitizeFileName(fileNameInput.value); save(); });
+}
+syncFileIdentityUI();
+$('#saveProgressFileBtn').addEventListener('click',exportProgressFile);
+$('#importProgressFileBtn').addEventListener('click',()=>importProgressFileInput.click());
+importProgressFileInput.addEventListener('change',()=>importProgressFile(importProgressFileInput.files && importProgressFileInput.files[0]));
+$('#teacherUnlockBtn').addEventListener('click',()=>activateTeacherMode($('#teacherCodeInput').value,$('#teacherCodeMsg')));
+$('#teacherCodeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();activateTeacherMode(e.currentTarget.value,$('#teacherCodeMsg'));}});
+$('#teacherUnlockBtnStart').addEventListener('click',()=>activateTeacherMode($('#teacherCodeInputStart').value,$('#teacherCodeMsgStart')));
+$('#teacherCodeInputStart').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();activateTeacherMode(e.currentTarget.value,$('#teacherCodeMsgStart'));}});
+$('#teacherExitBtn').addEventListener('click',deactivateTeacherMode);
+$('#startBtn').addEventListener('click',beginGame);
+$('#startFocusBtn').addEventListener('click',async()=>{ await toggleFocus(); beginGame(); });
+$('#focusBtn').addEventListener('click',toggleFocus);
+document.addEventListener('fullscreenchange',updateFocusButton);
+$('#continueBtn').addEventListener('click',()=>{sessionStart=Date.now();openExercise(Math.min(state.completed,TOTAL-1));});
+$('#showMissionsBtn').addEventListener('click',()=>$('#missionSection').scrollIntoView({behavior:'smooth'}));
+$('#finishCloseBtn').addEventListener('click',()=>{$('#finishOverlay').classList.add('hidden');$('#missionSection').scrollIntoView({behavior:'smooth'});});
+$('#resetBtn').addEventListener('click',()=>{
+  if(confirm('Reset semua tantangan dari awal? Progress, XP, badge/reward, dan jumlah kesalahan akan kembali ke nol. Nama file dan pemilik asli tetap dipertahankan.')){
+    teacherMode=false; $('#teacherToolbar').classList.add('hidden');
+    $('#finishOverlay').classList.add('hidden');
+    state={completed:0,started:true,totalMistakes:0,attempts:{},fileName:state.fileName||'',originalFileName:state.originalFileName||''};
+    activeIndex=0; sessionStart=Date.now(); save(); syncFileIdentityUI(); updateStats(); renderMissions(); openExercise(0);
+    setFileMessage(true,'Tantangan direset. Identitas file/pemilik tetap dipertahankan.');
+    toast('↻ Tantangan dan reward diulang dari awal.');
+  }
+});
+$('#resetAllBtn').addEventListener('click',resetAllData);
+
+updateStats();renderMissions();updateFocusButton();syncFileIdentityUI();
+if(state.started) $('#startOverlay').classList.add('hidden');
+if(state.completed>=TOTAL){renderFinish();$('#finishOverlay').classList.remove('hidden');}
+</script>
+</body>
+</html>
