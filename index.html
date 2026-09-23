@@ -115,6 +115,9 @@
   .exercise-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
   .next-btn{display:none}.next-btn.show{display:inline-flex}
 
+  .btn:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.15)}
+  .mission-card.locked .mission-open{cursor:not-allowed}
+
   /* click target */
   .center-stage{min-height:260px;display:grid;place-items:center;position:relative}
   .big-target{width:150px;height:70px;border-radius:22px;border:0;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;font-size:22px;font-weight:900;box-shadow:0 16px 35px rgba(79,124,255,.28)}
@@ -333,7 +336,7 @@
           <button id="importProgressFileBtn" class="btn btn-soft" type="button">📂 Import File</button>
           <input id="importProgressFileInput" type="file" accept=".json,.kka7,.kka7.json,application/json" class="hidden">
         </div>
-        <div id="fileProgressMsg" class="file-msg">Nama file pertama akan menjadi identitas pemilik dan terkunci setelah Save pertama.</div>
+        <div id="fileProgressMsg" class="file-msg">Isi <b>Nama File Saat Ini</b> terlebih dahulu untuk membuka tantangan. Nama file pertama akan menjadi identitas pemilik dan terkunci setelah Save pertama.</div>
       </div>
     </div>
     <div class="status-card">
@@ -378,29 +381,6 @@
     </div>
   </section>
 </main>
-
-<div id="startOverlay" class="start-overlay">
-  <div class="modal-card">
-    <div class="modal-emoji">🕹️</div>
-    <h2>Siap Mulai?</h2>
-    <p>Kamu akan menyelesaikan <b>45 latihan</b>. Tidak perlu menunggu teman. Jika salah, coba lagi sampai berhasil.</p>
-    <div class="rules">
-      <div class="rule">📖<br><b>Baca</b><br>petunjuk tiap latihan</div>
-      <div class="rule">🎯<br><b>Kerjakan</b><br>sampai berhasil</div>
-      <div class="rule">🔓<br><b>Buka</b><br>latihan berikutnya</div>
-    </div>
-    <div class="teacher-access" style="text-align:left;margin-bottom:12px">
-      <div class="teacher-access-head"><b>👨‍🏫 Akses Guru</b><small>Opsional</small></div>
-      <div class="teacher-access-row">
-        <input id="teacherCodeInputStart" class="teacher-code-input" type="password" autocomplete="off" placeholder="Masukkan kode guru" aria-label="Kode guru pada layar awal">
-        <button id="teacherUnlockBtnStart" class="btn btn-soft" type="button">🔓 Buka Semua</button>
-      </div>
-      <div id="teacherCodeMsgStart" class="teacher-code-msg"></div>
-    </div>
-    <button id="startFocusBtn" class="btn btn-primary" style="width:100%;font-size:18px;padding:15px">⛶ Mulai dalam Mode Fokus</button>
-    <button id="startBtn" class="btn btn-soft" style="width:100%;font-size:16px;padding:13px;margin-top:9px">Mulai Biasa</button>
-  </div>
-</div>
 
 <div id="finishOverlay" class="finish-overlay hidden">
   <div class="modal-card">
@@ -607,7 +587,6 @@ async function importProgressFile(file){
     sessionStart=Date.now();
     save(); syncFileIdentityUI(); updateStats(); renderMissions();
     $('#teacherToolbar').classList.add('hidden');
-    $('#startOverlay').classList.add('hidden');
     setFileMessage(true,`Import berhasil. Pemilik asli file: ${state.originalFileName}`);
     toast('📂 Progres berhasil di-import.');
     if(state.completed>=TOTAL){renderFinish();$('#finishOverlay').classList.remove('hidden');}
@@ -619,9 +598,10 @@ async function importProgressFile(file){
   }
 }
 function idxToME(idx){ return {m:Math.floor(idx/3), e:idx%3}; }
-function missionOpen(m){ return teacherMode || state.completed >= m*3; }
+function hasStudentIdentity(){ return sanitizeFileName(state.fileName).length>0; }
+function missionOpen(m){ return teacherMode || (hasStudentIdentity() && state.completed >= m*3); }
 function missionDone(m){ return state.completed >= (m+1)*3; }
-function currentOpenMission(){ return teacherMode ? missions.length : Math.min(missions.length, Math.floor(state.completed/3)+1); }
+function currentOpenMission(){ if(teacherMode) return missions.length; if(!hasStudentIdentity()) return 0; return Math.min(missions.length, Math.floor(state.completed/3)+1); }
 function rank(){ if(state.completed>=TOTAL) return 'Jago Komputer'; if(state.completed>=39) return 'Mahir'; if(state.completed>=30) return 'Terampil'; if(state.completed>=15) return 'Berkembang'; return 'Pemula'; }
 function earnedBadges(){ return BADGES.filter(b=>state.completed>=b.at); }
 function renderBadges(){
@@ -660,7 +640,13 @@ function updateStats(){
   xpText.textContent=state.completed*100;
   doneStat.textContent=`${state.completed} / ${TOTAL}`;
   openMissionStat.textContent=`${currentOpenMission()} / ${missions.length}`;
-  statusStat.textContent=teacherMode?'Mode Guru':rank();
+  statusStat.textContent=teacherMode?'Mode Guru':(!hasStudentIdentity()?'Isi Nama File':rank());
+  const continueBtn=$('#continueBtn');
+  if(continueBtn){
+    const locked=!teacherMode && !hasStudentIdentity();
+    continueBtn.disabled=locked;
+    continueBtn.textContent=locked?'🔒 Isi Nama File Dulu':'▶ Lanjutkan Latihan';
+  }
   renderBadges();
 }
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2100); }
@@ -691,7 +677,7 @@ function renderMissions(){
       <div class="mission-top"><div class="mission-icon">${m.icon}</div><div class="lock">${done?'✅':teacherMode?'👨‍🏫':open?'🔓':'🔒'}</div></div>
       <h3>Misi ${mi+1} — ${m.title}</h3><p>${m.desc}</p>
       <div class="mission-mini">${dots}</div>
-      <button class="mission-open" ${open?'':'disabled'}>${teacherMode?'Buka Misi':done?'Lihat Misi':open?'Buka Misi':'Terkunci'}</button>
+      <button class="mission-open" ${open?'':'disabled'}>${teacherMode?'Buka Misi':!hasStudentIdentity()?'Isi Nama File':done?'Lihat Misi':open?'Buka Misi':'Terkunci'}</button>
       ${teacherMode?`<div class="teacher-ex-links">${[0,1,2].map(e=>`<button type="button" class="teacher-ex-btn" data-ex="${e}">Latihan ${e+1}</button>`).join('')}</div>`:''}`;
     card.querySelector('.mission-open').addEventListener('click',()=>{
       if(!open) return;
@@ -706,6 +692,11 @@ function renderMissions(){
 }
 
 function openExercise(idx){
+  if(!teacherMode && !hasStudentIdentity()){
+    setFileMessage(false,'Isi Nama File Saat Ini terlebih dahulu untuk membuka tantangan.');
+    if(fileNameInput) fileNameInput.focus();
+    return toast('Isi Nama File terlebih dahulu 🔒');
+  }
   if(idx>state.completed && !teacherMode) return toast('Selesaikan latihan sebelumnya dulu 🔒');
   activeIndex=idx;
   if(currentCleanup) currentCleanup();
@@ -1210,12 +1201,9 @@ function activateTeacherMode(code,msgEl){
   }
   teacherMode=true;
   sessionStart=Date.now();
-  $('#startOverlay').classList.add('hidden');
   $('#teacherToolbar').classList.remove('hidden');
   setTeacherMessage($('#teacherCodeMsg'),true,'Mode Guru aktif. Semua latihan sudah terbuka.');
-  setTeacherMessage($('#teacherCodeMsgStart'),true,'Mode Guru aktif.');
   const mainInput=$('#teacherCodeInput'); if(mainInput) mainInput.value='';
-  const startInput=$('#teacherCodeInputStart'); if(startInput) startInput.value='';
   updateStats(); renderMissions();
   toast('👨‍🏫 Mode Guru aktif — semua latihan terbuka.');
   $('#missionSection').scrollIntoView({behavior:'smooth'});
@@ -1226,7 +1214,7 @@ function deactivateTeacherMode(){
   $('#teacherToolbar').classList.add('hidden');
   setTeacherMessage($('#teacherCodeMsg'),true,'Mode Guru dinonaktifkan.');
   updateStats(); renderMissions();
-  if(activeIndex>state.completed) exerciseShell.classList.add('hidden');
+  if(activeIndex>state.completed || !hasStudentIdentity()) exerciseShell.classList.add('hidden');
   toast('Mode Guru dinonaktifkan.');
 }
 function resetAllData(){
@@ -1242,7 +1230,6 @@ function resetAllData(){
   if(originalFileNameInput) originalFileNameInput.value='';
   if(importProgressFileInput) importProgressFileInput.value='';
   if($('#teacherCodeInput')) $('#teacherCodeInput').value='';
-  if($('#teacherCodeInputStart')) $('#teacherCodeInputStart').value='';
   $('#teacherToolbar').classList.add('hidden');
   $('#finishOverlay').classList.add('hidden');
   exerciseShell.classList.add('hidden');
@@ -1250,18 +1237,19 @@ function resetAllData(){
   syncFileIdentityUI();
   updateStats();
   renderMissions();
-  setFileMessage(true,'Semua data telah direset. Nama file pertama akan kembali terkunci setelah Save pertama.');
-  $('#startOverlay').classList.remove('hidden');
+  setFileMessage(true,'Semua data telah direset. Isi Nama File Saat Ini untuk membuka tantangan.');
+  window.scrollTo({top:0,behavior:'smooth'});
   toast('🗑️ Semua data berhasil direset.');
-}
-function beginGame(){
-  state.started=true; save(); sessionStart=Date.now();
-  $('#startOverlay').classList.add('hidden');
-  openExercise(Math.min(state.completed,TOTAL-1));
 }
 if(fileNameInput){
   fileNameInput.value=state.fileName||'';
-  fileNameInput.addEventListener('input',()=>{ state.fileName=sanitizeFileName(fileNameInput.value); save(); });
+  fileNameInput.addEventListener('input',()=>{
+    state.fileName=sanitizeFileName(fileNameInput.value);
+    if(state.fileName) state.started=true;
+    save(); updateStats(); renderMissions();
+    if(state.fileName) setFileMessage(true,'Nama file terisi. Tantangan sudah bisa dikerjakan.');
+    else setFileMessage(false,'Isi Nama File Saat Ini terlebih dahulu untuk membuka tantangan.');
+  });
 }
 syncFileIdentityUI();
 $('#saveProgressFileBtn').addEventListener('click',exportProgressFile);
@@ -1269,14 +1257,13 @@ $('#importProgressFileBtn').addEventListener('click',()=>importProgressFileInput
 importProgressFileInput.addEventListener('change',()=>importProgressFile(importProgressFileInput.files && importProgressFileInput.files[0]));
 $('#teacherUnlockBtn').addEventListener('click',()=>activateTeacherMode($('#teacherCodeInput').value,$('#teacherCodeMsg')));
 $('#teacherCodeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();activateTeacherMode(e.currentTarget.value,$('#teacherCodeMsg'));}});
-$('#teacherUnlockBtnStart').addEventListener('click',()=>activateTeacherMode($('#teacherCodeInputStart').value,$('#teacherCodeMsgStart')));
-$('#teacherCodeInputStart').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();activateTeacherMode(e.currentTarget.value,$('#teacherCodeMsgStart'));}});
 $('#teacherExitBtn').addEventListener('click',deactivateTeacherMode);
-$('#startBtn').addEventListener('click',beginGame);
-$('#startFocusBtn').addEventListener('click',async()=>{ await toggleFocus(); beginGame(); });
 $('#focusBtn').addEventListener('click',toggleFocus);
 document.addEventListener('fullscreenchange',updateFocusButton);
-$('#continueBtn').addEventListener('click',()=>{sessionStart=Date.now();openExercise(Math.min(state.completed,TOTAL-1));});
+$('#continueBtn').addEventListener('click',()=>{
+  if(!teacherMode && !hasStudentIdentity()){setFileMessage(false,'Isi Nama File Saat Ini terlebih dahulu untuk membuka tantangan.');fileNameInput?.focus();return toast('Isi Nama File terlebih dahulu 🔒');}
+  sessionStart=Date.now();openExercise(Math.min(state.completed,TOTAL-1));
+});
 $('#showMissionsBtn').addEventListener('click',()=>$('#missionSection').scrollIntoView({behavior:'smooth'}));
 $('#finishCloseBtn').addEventListener('click',()=>{$('#finishOverlay').classList.add('hidden');$('#missionSection').scrollIntoView({behavior:'smooth'});});
 $('#resetBtn').addEventListener('click',()=>{
@@ -1284,7 +1271,8 @@ $('#resetBtn').addEventListener('click',()=>{
     teacherMode=false; $('#teacherToolbar').classList.add('hidden');
     $('#finishOverlay').classList.add('hidden');
     state={completed:0,started:true,totalMistakes:0,attempts:{},fileName:state.fileName||'',originalFileName:state.originalFileName||''};
-    activeIndex=0; sessionStart=Date.now(); save(); syncFileIdentityUI(); updateStats(); renderMissions(); openExercise(0);
+    activeIndex=0; sessionStart=Date.now(); save(); syncFileIdentityUI(); updateStats(); renderMissions();
+    if(hasStudentIdentity()) openExercise(0); else exerciseShell.classList.add('hidden');
     setFileMessage(true,'Tantangan direset. Identitas file/pemilik tetap dipertahankan.');
     toast('↻ Tantangan dan reward diulang dari awal.');
   }
@@ -1292,7 +1280,7 @@ $('#resetBtn').addEventListener('click',()=>{
 $('#resetAllBtn').addEventListener('click',resetAllData);
 
 updateStats();renderMissions();updateFocusButton();syncFileIdentityUI();
-if(state.started) $('#startOverlay').classList.add('hidden');
+if(!hasStudentIdentity()) setFileMessage(false,'Isi Nama File Saat Ini terlebih dahulu untuk membuka tantangan.');
 if(state.completed>=TOTAL){renderFinish();$('#finishOverlay').classList.remove('hidden');}
 </script>
 </body>
