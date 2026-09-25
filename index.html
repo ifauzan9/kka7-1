@@ -223,7 +223,11 @@
   .start-overlay,.finish-overlay{
     position:fixed;inset:0;background:rgba(20,28,48,.55);backdrop-filter:blur(7px);z-index:200;display:grid;place-items:center;padding:18px
   }
+  /* Hasil akhir harus tetap bisa digulir pada layar pendek / fullscreen. */
+  .finish-overlay{display:block;overflow-y:auto;overscroll-behavior:contain;padding:18px}
+  .finish-overlay .modal-card{margin:0 auto 24px;min-height:min-content}
   .modal-card{max-width:620px;width:100%;padding:30px;text-align:center}
+  .finish-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;padding-bottom:4px}
   .modal-emoji{font-size:64px}.modal-card h2{font-size:34px;margin:10px 0}.modal-card p{color:var(--muted);line-height:1.6}.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.rule{background:#f6f8ff;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:13px}
 
   .badge-panel{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 20px;margin-bottom:22px}
@@ -284,7 +288,7 @@
       <div><b>Mouse & Keyboard Quest</b><small>KKA Kelas 7</small></div>
     </div>
     <div class="progress-wrap">
-      <div class="progress-meta"><span>Progress Latihan</span><span id="progressText">0 / 45</span></div>
+      <div class="progress-meta"><span>Progress Latihan</span><span id="progressText">0 / 42</span></div>
       <div class="progress"><div id="progressFill" class="progress-fill"></div></div>
     </div>
     <div class="xp-pill">⭐ <span id="xpText">0</span> XP</div>
@@ -313,7 +317,7 @@
         <div id="teacherCodeMsg" class="teacher-code-msg"></div>
       </div>
       <div id="teacherToolbar" class="teacher-toolbar hidden">
-        <div><b>✅ Mode Guru aktif</b><br><small>Semua 45 latihan terbuka. Pilih Latihan 1/2/3 pada kartu misi.</small></div>
+        <div><b>✅ Mode Guru aktif</b><br><small>Semua 42 latihan terbuka. Pilih Latihan 1/2/3 pada kartu misi.</small></div>
         <button id="teacherExitBtn" class="btn btn-soft" type="button">Keluar Mode Guru</button>
       </div>
       <div class="file-panel" id="filePanel">
@@ -341,7 +345,7 @@
     </div>
     <div class="status-card">
       <div class="stat-row"><span class="stat-label">Misi terbuka</span><span class="stat-value" id="openMissionStat">1 / 15</span></div>
-      <div class="stat-row"><span class="stat-label">Latihan selesai</span><span class="stat-value" id="doneStat">0 / 45</span></div>
+      <div class="stat-row"><span class="stat-label">Latihan selesai</span><span class="stat-value" id="doneStat">0 / 42</span></div>
       <div class="stat-row"><span class="stat-label">Status</span><span class="stat-value" id="statusStat">Pemula</span></div>
     </div>
   </section>
@@ -392,7 +396,10 @@
     <div id="finishBadges" class="finish-badges"></div>
     <div><small style="color:var(--muted)">Kode hasil</small></div>
     <div id="resultCode" class="result-code">KKA-MK</div>
-    <button id="finishCloseBtn" class="btn btn-primary" style="width:100%">Kembali ke Peta Misi</button>
+    <div class="finish-actions">
+      <button id="finishSaveBtn" class="btn btn-soft" type="button" style="width:100%">💾 Save File Hasil</button>
+      <button id="finishCloseBtn" class="btn btn-primary" type="button" style="width:100%">Kembali ke Peta Misi</button>
+    </div>
   </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -454,12 +461,12 @@ const missions = [
     {title:'Dua Kata', desc:'Perhatikan spasi antar kata.', type:'typing', text:'belajar teknologi'},
     {title:'Kalimat Pendek', desc:'Ketik seluruh kalimat tanpa salah.', type:'typing', text:'saya belajar komputer di sekolah'}
   ]},
-  {icon:'⬆️', title:'Shift & Huruf Besar', desc:'Latihan huruf kapital.', exercises:[
-    {title:'Huruf Besar', desc:'Gunakan huruf kapital sesuai contoh.', type:'typing', text:'KKA'},
-    {title:'Dua Kata', desc:'Perhatikan huruf K dan T.', type:'typing', text:'Kelas Tujuh'},
-    {title:'Judul Singkat', desc:'Ketik persis seperti contoh.', type:'typing', text:'Saya Belajar Teknologi'}
+  {icon:'⬆️', title:'Shift & Huruf Besar', desc:'Latihan membuat huruf kapital dengan tombol Shift.', exercises:[
+    {title:'Huruf Besar', desc:'Ketik KKA dengan huruf kapital.', type:'typing', text:'KKA'},
+    {title:'Dua Kata', desc:'Ketik Kelas Tujuh dengan huruf kapital yang tepat.', type:'typing', text:'Kelas Tujuh'},
+    {title:'Judul Singkat', desc:'Ketik judul dengan huruf kapital sesuai contoh.', type:'typing', text:'Saya Belajar Teknologi'}
   ]},
-  {icon:'✨', title:'Shift + Simbol', desc:'Gunakan Shift untuk membuat simbol.', exercises:[
+  {icon:'✨', title:'Shift + Simbol', desc:'Gunakan Shift untuk membuat simbol pada keyboard.', exercises:[
     {title:'Simbol Seru !', desc:'Tekan Shift + 1 untuk membuat tanda seru.', type:'shiftSymbol', symbol:'!', keyLabel:'1'},
     {title:'Simbol @', desc:'Tekan Shift + 2 untuk membuat simbol @.', type:'shiftSymbol', symbol:'@', keyLabel:'2'},
     {title:'Simbol &', desc:'Tekan Shift + 7 untuk membuat simbol &.', type:'shiftSymbol', symbol:'&', keyLabel:'7'}
@@ -467,13 +474,8 @@ const missions = [
   {icon:'↩️', title:'Backspace & Enter', desc:'Perbaiki salah ketik dan buat baris baru.', exercises:[
     {title:'Perbaiki Kata', desc:'Hapus huruf berlebih dengan Backspace.', type:'editTyping', initial:'komputerr', answer:'komputer'},
     {title:'Perbaiki Kalimat', desc:'Perbaiki dua kata yang salah.', type:'editTyping', initial:'Saya belajarr teknologii', answer:'Saya belajar teknologi'},
-    {title:'Tiga Baris', desc:'Gunakan Enter agar teks menjadi 3 baris.', type:'multiline', text:'KKA\nKelas 7\nLab Komputer'}
+    {title:'Tiga Baris', desc:'Gunakan Enter agar teks menjadi tiga baris.', type:'multiline', text:'KKA\nKelas 7\nLab Komputer'}
   ]},
-  {icon:'🏆', title:'Tantangan Keyboard', desc:'Gabungkan kemampuan mengetik.', exercises:[
-    {title:'KKA Kelas 7', desc:'Perhatikan huruf besar dan spasi.', type:'typing', text:'KKA Kelas 7'},
-    {title:'Simbol &', desc:'Ketik simbol & dengan tepat.', type:'typing', text:'Mouse & Keyboard'},
-    {title:'Tantangan Akhir', desc:'Ketik seluruh kalimat dengan teliti.', type:'typing', text:'Hari ini saya belajar menggunakan Mouse & Keyboard dengan baik!'}
-  ]}
 ];
 
 const TOTAL = missions.length * 3;
@@ -481,7 +483,7 @@ const TEACHER_CODE = 'spensahade';
 let teacherMode = false;
 const STORAGE_KEY='mkQuestStateV9';
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {completed:0, started:false};
-state.completed = Number(state.completed || 0);
+state.completed = Math.min(TOTAL, Number(state.completed || 0));
 state.started = !!state.started;
 state.totalMistakes = Number(state.totalMistakes || 0);
 state.attempts = state.attempts || {};
@@ -499,8 +501,10 @@ const BADGES = [
   {at:27, icon:'🎯', name:'Precision Hunter', desc:'Misi Mouse Precision selesai'},
   {at:30, icon:'🖱️', name:'Mouse Master', desc:'Semua misi mouse selesai'},
   {at:33, icon:'⌨️', name:'Keyboard Rookie', desc:'Misi mengetik selesai'},
-  {at:39, icon:'✨', name:'Shift Master', desc:'Misi Shift + Simbol selesai'},
-  {at:45, icon:'🏆', name:'Computer Explorer', desc:'Semua misi selesai'}
+  {at:36, icon:'⬆️', name:'Shift Master', desc:'Misi Shift & Huruf Besar selesai'},
+  {at:39, icon:'✨', name:'Symbol Master', desc:'Misi Shift + Simbol selesai'},
+  {at:42, icon:'↩️', name:'Keyboard Fixer', desc:'Misi Backspace & Enter selesai'},
+  {at:42, icon:'🏆', name:'Computer Explorer', desc:'Semua misi selesai'}
 ];
 
 const $ = s => document.querySelector(s);
@@ -1265,6 +1269,7 @@ $('#continueBtn').addEventListener('click',()=>{
   sessionStart=Date.now();openExercise(Math.min(state.completed,TOTAL-1));
 });
 $('#showMissionsBtn').addEventListener('click',()=>$('#missionSection').scrollIntoView({behavior:'smooth'}));
+$('#finishSaveBtn').addEventListener('click',exportProgressFile);
 $('#finishCloseBtn').addEventListener('click',()=>{$('#finishOverlay').classList.add('hidden');$('#missionSection').scrollIntoView({behavior:'smooth'});});
 $('#resetBtn').addEventListener('click',()=>{
   if(confirm('Reset semua tantangan dari awal? Progress, XP, badge/reward, dan jumlah kesalahan akan kembali ke nol. Nama file dan pemilik asli tetap dipertahankan.')){
